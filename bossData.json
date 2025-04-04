@@ -1,24 +1,20 @@
 [
-  { "id": "boss1", "name": "A王", "respawnIntervalHours": 6, "lastKilled": null },
-  { "id": "boss2", "name": "B王", "respawnIntervalHours": 6, "lastKilled": null },
-  { "id": "boss3", "name": "C王", "respawnIntervalHours": 6, "lastKilled": null },
-  { "id": "boss4", "name": "D王", "respawnIntervalHours": 6, "lastKilled": null },
-  { "id": "boss5", "name": "E王", "respawnIntervalHours": 6, "lastKilled": null },
-  { "id": "boss6", "name": "F王", "respawnIntervalHours": 6, "lastKilled": null },
-  { "id": "boss7", "name": "G王", "respawnIntervalHours": 6, "lastKilled": null },
-  { "id": "boss8", "name": "H王", "respawnIntervalHours": 6, "lastKilled": null },
-  { "id": "boss9", "name": "I王", "respawnIntervalHours": 6, "lastKilled": null },
-  { "id": "boss10", "name": "J王", "respawnIntervalHours": 6, "lastKilled": null },
-  { "id": "boss11", "name": "K王", "respawnIntervalHours": 8, "lastKilled": null },
-  { "id": "boss12", "name": "L王", "respawnIntervalHours": 8, "lastKilled": null },
-  { "id": "boss13", "name": "M王", "respawnIntervalHours": 8, "lastKilled": null },
-  { "id": "boss14", "name": "N王", "respawnIntervalHours": 8, "lastKilled": null },
-  { "id": "boss15", "name": "O王", "respawnIntervalHours": 8, "lastKilled": null },
-  { "id": "boss16", "name": "P王", "respawnIntervalHours": 8, "lastKilled": null },
-  { "id": "boss17", "name": "Q王", "respawnIntervalHours": 8, "lastKilled": null },
-  { "id": "boss18", "name": "R王", "respawnIntervalHours": 8, "lastKilled": null },
-  { "id": "boss19", "name": "S王", "respawnIntervalHours": 24, "lastKilled": null },
-  { "id": "boss20", "name": "T王", "respawnIntervalHours": 24, "lastKilled": null },
-  { "id": "boss21", "name": "U王", "respawnIntervalHours": 24, "lastKilled": null },
-  { "id": "boss22", "name": "V王", "respawnIntervalHours": 24, "lastKilled": null }
+  {
+    "id": "boss1",
+    "name": "A王",
+    "respawnHours": 6,
+    "lastKilled": "2025-04-04T16:00:00.000Z"
+  },
+  {
+    "id": "boss2",
+    "name": "B王",
+    "respawnHours": 8,
+    "lastKilled": "2025-04-04T12:00:00.000Z"
+  },
+  {
+    "id": "boss3",
+    "name": "C王",
+    "respawnHours": 24,
+    "lastKilled": "2025-04-03T22:00:00.000Z"
+  }
 ]
