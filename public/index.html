@@ -14,12 +14,15 @@
   <h1>🎯 BOSS 提示系統</h1>
   <div id="bossList">載入中...</div>
 
-  <!-- 音效 -->
-  <audio id="alertSound" src="https://notificationsounds.com/storage/sounds/file-sounds-1151-pristine.mp3" preload="auto"></audio>
+  <!-- 預設音效 -->
+  <audio id="alertSound" src="/sounds/default.mp3" preload="auto"></audio>
+  <!-- 語音提示 -->
+  <audio id="voiceSound" preload="auto"></audio>
 
   <script>
     const bossListEl = document.getElementById("bossList");
     const alertSound = document.getElementById("alertSound");
+    const voiceSound = document.getElementById("voiceSound");
 
     let bossData = [];
 
@@ -53,6 +56,14 @@
           // 提示音效 (1分鐘內)
           if (timeLeftMs < 60000 && !boss.alerted) {
             alertSound.play();
+
+            // 播放語音提示
+            const audioName = getAudioFilename(boss.name);
+            if (audioName) {
+              voiceSound.src = `/sounds/${audioName}`;
+              voiceSound.play();
+            }
+
             boss.alerted = true;
             warningText = `<div class="warning">⚠️ ${boss.name} 即將在 1 分鐘內重生！</div>`;
           }
@@ -72,6 +83,17 @@
 
         bossListEl.appendChild(container);
       });
+    }
+
+    // 根據 BOSS 名稱取得語音檔案名
+    function getAudioFilename(name) {
+      const mapping = {
+        "飛龍1": "fly1.mp3",
+        "飛龍2": "fly2.mp3",
+        "飛龍3": "fly3.mp3",
+        "飛龍4": "fly4.mp3"
+      };
+      return mapping[name] || null;
     }
 
     async function resetTime(bossId) {
