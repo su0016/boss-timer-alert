@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 const GITHUB_USERNAME = 'su0016';
 const REPO_NAME = 'boss-timer-alert';
-const TOKEN = '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';
+const TOKEN = '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';
 const BRANCH = 'main';
 
 app.use(express.json());
