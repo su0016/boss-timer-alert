@@ -1,11 +1,87 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <title>BOSS 提示系統</title>
-  </head>
-  <body>
-    <h1>歡迎來到 BOSS 提示系統</h1>
-    <div id="app"></div>
-  </body>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>BOSS 提示系統</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .boss { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 8px; }
+    .warning { color: red; font-weight: bold; }
+    button { padding: 5px 10px; }
+  </style>
+</head>
+<body>
+  <h1>🎯 BOSS 提示系統</h1>
+  <div id="bossList">載入中...</div>
+
+  <!-- 音效 -->
+  <audio id="alertSound" src="https://notificationsounds.com/storage/sounds/file-sounds-1151-pristine.mp3" preload="auto"></audio>
+
+  <script>
+    const bossListEl = document.getElementById("bossList");
+    const alertSound = document.getElementById("alertSound");
+
+    let bossData = [];
+
+    async function fetchBosses() {
+      const res = await fetch("/api/bosses");
+      bossData = await res.json();
+      updateBossList();
+    }
+
+    function updateBossList() {
+      bossListEl.innerHTML = "";
+      const now = new Date();
+
+      bossData.forEach(boss => {
+        const container = document.createElement("div");
+        container.className = "boss";
+
+        const lastKilled = new Date(boss.lastKilled);
+        const respawnTime = new Date(lastKilled.getTime() + boss.respawnHours * 60 * 60 * 1000);
+        const timeLeftMs = respawnTime - now;
+
+        let countdownText = "";
+        let warningText = "";
+
+        if (timeLeftMs > 0) {
+          const hours = Math.floor(timeLeftMs / 3600000);
+          const minutes = Math.floor((timeLeftMs % 3600000) / 60000);
+          const seconds = Math.floor((timeLeftMs % 60000) / 1000);
+          countdownText = `⏳ 倒數：${hours} 小時 ${minutes} 分 ${seconds} 秒`;
+
+          // 提示音效 (1分鐘內)
+          if (timeLeftMs < 60000 && !boss.alerted) {
+            alertSound.play();
+            boss.alerted = true;
+            warningText = `<div class="warning">⚠️ ${boss.name} 即將在 1 分鐘內重生！</div>`;
+          }
+        } else {
+          countdownText = "✅ 已重生";
+          boss.alerted = false;
+        }
+
+        container.innerHTML = `
+          <h3>${boss.name}</h3>
+          ${warningText}
+          <div>上次擊殺時間：${lastKilled.toLocaleString()}</div>
+          <div>下一次重生時間：${respawnTime.toLocaleString()}</div>
+          <div>${countdownText}</div>
+          <button onclick="resetTime('${boss.id}')">🕹️ 點我重設出生時間</button>
+        `;
+
+        bossListEl.appendChild(container);
+      });
+    }
+
+    async function resetTime(bossId) {
+      await fetch(`/api/boss/${bossId}/kill`, { method: "POST" });
+      await fetchBosses();
+    }
+
+    // 初始載入 + 每秒更新畫面
+    fetchBosses();
+    setInterval(updateBossList, 1000);
+  </script>
+</body>
 </html>
