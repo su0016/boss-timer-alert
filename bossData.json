@@ -1,19 +1,19 @@
 [
   {
     "id": "boss1",
-    "name": "A王",
+    "name": "飛龍",
     "respawnHours": 0.0833,
     "lastKilled": "2025-04-04T22:32:00Z"
   },
   {
     "id": "boss2",
-    "name": "B王",
+    "name": "反王",
     "respawnHours": 1,
     "lastKilled": "2025-04-04T12:00:00.000Z"
   },
   {
     "id": "boss3",
-    "name": "C王",
+    "name": "克特",
     "respawnHours": 1,
     "lastKilled": "2025-04-03T22:00:00.000Z"
   }
