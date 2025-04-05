@@ -73,6 +73,16 @@
     #refreshBtn:hover {
       background-color: #ff6347;
     }
+
+    .time-adjust-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .time-adjust-buttons button {
+      width: 45%;
+    }
   </style>
 </head>
 <body>
@@ -92,7 +102,7 @@
 
   <!-- 添加啟用音效的按鈕 -->
   <button onclick="enableSound()">啟用音效</button>
-
+  
   <!-- 預設音效 -->
   <audio id="alertSound" src="/sounds/default.mp3" preload="auto"></audio>
   <!-- 語音提示 -->
@@ -121,7 +131,7 @@
       bossData.forEach(boss => {
         const container = document.createElement("div");
         container.className = "boss";
-        container.id = `boss-${boss.name}`;
+        container.id = `boss-${boss.name}`; // 讓超連結能跳過來
 
         const lastKilled = new Date(boss.lastKilled);
         const respawnTime = new Date(boss.respawnTime);
@@ -161,13 +171,15 @@
           <div>${countdownText}</div>
           <br />
           <button onclick="resetTime('${boss.name}')">🕹️ 點我重設出生時間</button>
-          <br />
-          <button onclick="adjustRespawnTime('${boss.name}', -1)">⏳ 減少 1 分鐘</button>
-          <button onclick="adjustRespawnTime('${boss.name}', 1)">⏳ 增加 1 分鐘</button>
+          <div class="time-adjust-buttons">
+            <button onclick="adjustTime('${boss.name}', 1)">+1 分鐘</button>
+            <button onclick="adjustTime('${boss.name}', -1)">-1 分鐘</button>
+          </div>
         `;
 
         bossListEl.appendChild(container);
 
+        // 加入導覽欄按鈕
         const link = document.createElement("a");
         link.href = `#boss-${boss.name}`;
         link.textContent = boss.name;
@@ -175,6 +187,7 @@
       });
     }
 
+    // 根據 BOSS 名稱取得語音檔案名
     function getAudioFilename(name) {
       const mapping = {
         "飛龍-1": "Fly1.mp3",
@@ -205,23 +218,31 @@
 
     async function resetTime(bossName) {
       await fetch(`/api/boss/${bossName}/kill`, { method: "POST" });
+      await fetchBosses();  // 重設後重新載入 BOSS 資料
+    }
+
+    // 調整時間 (+/- 1 分鐘)
+    async function adjustTime(bossName, minutes) {
+      await fetch(`/api/boss/${bossName}/adjustTime`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ minutes })
+      });
       await fetchBosses();
     }
 
-    async function adjustRespawnTime(bossName, minutes) {
-      await fetch(`/api/boss/${bossName}/adjust/${minutes}`, { method: "POST" });
-      await fetchBosses();
-    }
-
+    // 啟用音效
     function enableSound() {
       alertSound.play();
       voiceSound.play();
     }
 
+    // 刷新頁面
     function refreshPage() {
       location.reload();
     }
 
+    // 初始載入 + 每秒更新畫面
     fetchBosses();
     setInterval(updateBossList, 1000);
   </script>
