@@ -14,8 +14,8 @@
   <h1>🎯 BOSS 提示系統</h1>
   <div id="bossList">載入中...</div>
 
-  <!-- 刷新介面的按鈕 -->
-  <button onclick="fetchBosses()">刷新介面</button>
+  <!-- 添加啟用音效的按鈕 -->
+  <button onclick="enableSound()">啟用音效</button>
   
   <!-- 預設音效 -->
   <audio id="alertSound" src="/sounds/default.mp3" preload="auto"></audio>
@@ -28,15 +28,6 @@
     const voiceSound = document.getElementById("voiceSound");
 
     let bossData = [];
-
-    // 設置 SSE 來接收伺服器推送的資料
-    const eventSource = new EventSource('/events');
-    eventSource.onmessage = function(event) {
-      const message = JSON.parse(event.data);
-      if (message.action === 'update') {
-        fetchBosses();  // 收到更新事件後重新加載 BOSS 資料
-      }
-    };
 
     async function fetchBosses() {
       const res = await fetch("/api/bosses");
@@ -53,7 +44,7 @@
         container.className = "boss";
 
         const lastKilled = new Date(boss.lastKilled);
-        let respawnTime = new Date(boss.respawnTime);
+        const respawnTime = new Date(boss.respawnTime);
         const timeLeftMs = respawnTime - now;
 
         let countdownText = "";
@@ -93,9 +84,6 @@
           <button onclick="resetTime('${boss.name}')">🕹️ 點我重設出生時間</button>
         `;
 
-        // 启动倒计时更新
-        startCountdown(boss, container);
-
         bossListEl.appendChild(container);
       });
     }
@@ -112,38 +100,13 @@
     }
 
     async function resetTime(bossName) {
-      // 呼叫 API 來更新 BOSS 的重生時間
       await fetch(`/api/boss/${bossName}/kill`, { method: "POST" });
-
-      // 重設出生時間後，馬上刷新頁面以顯示新的倒數時間
-      fetchBosses();
+      await fetchBosses();  // 重設後重新載入 BOSS 資料
     }
 
-    function startCountdown(boss, container) {
-      const now = new Date();
-      let respawnTime = new Date(boss.respawnTime);
-      const timeLeftMs = respawnTime - now;
-
-      // 如果倒數時間大於0，開始每秒更新
-      if (timeLeftMs > 0) {
-        setInterval(function() {
-          const now = new Date();
-          const timeLeftMs = respawnTime - now;
-          
-          if (timeLeftMs <= 0) return; // 如果時間到，停止倒數
-
-          const hours = Math.floor(timeLeftMs / 3600000);
-          const minutes = Math.floor((timeLeftMs % 3600000) / 60000);
-          const seconds = Math.floor((timeLeftMs % 60000) / 1000);
-
-          // 更新倒數顯示
-          container.querySelector("div").textContent = `⏳ 倒數：${hours} 小時 ${minutes} 分 ${seconds} 秒`;
-        }, 1000); // 每秒更新倒數
-      }
-    }
-
-    // 初始載入
+    // 初始載入 + 每秒更新畫面
     fetchBosses();
+    setInterval(updateBossList, 1000);
   </script>
 </body>
 </html>
