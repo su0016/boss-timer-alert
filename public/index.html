@@ -73,16 +73,6 @@
     #refreshBtn:hover {
       background-color: #ff6347;
     }
-
-    .time-adjust-buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 10px;
-    }
-
-    .time-adjust-buttons button {
-      width: 45%;
-    }
   </style>
 </head>
 <body>
@@ -171,10 +161,6 @@
           <div>${countdownText}</div>
           <br />
           <button onclick="resetTime('${boss.name}')">🕹️ 點我重設出生時間</button>
-          <div class="time-adjust-buttons">
-            <button onclick="adjustTime('${boss.name}', 1)">+1 分鐘</button>
-            <button onclick="adjustTime('${boss.name}', -1)">-1 分鐘</button>
-          </div>
         `;
 
         bossListEl.appendChild(container);
@@ -219,16 +205,6 @@
     async function resetTime(bossName) {
       await fetch(`/api/boss/${bossName}/kill`, { method: "POST" });
       await fetchBosses();  // 重設後重新載入 BOSS 資料
-    }
-
-    // 調整時間 (+/- 1 分鐘)
-    async function adjustTime(bossName, minutes) {
-      await fetch(`/api/boss/${bossName}/adjustTime`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ minutes })
-      });
-      await fetchBosses();
     }
 
     // 啟用音效
