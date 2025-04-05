@@ -17,9 +17,6 @@
   <!-- 刷新介面的按鈕 -->
   <button onclick="fetchBosses()">刷新介面</button>
   
-  <!-- 添加啟用音效的按鈕 -->
-  <button onclick="enableSound()">啟用音效</button>
-  
   <!-- 預設音效 -->
   <audio id="alertSound" src="/sounds/default.mp3" preload="auto"></audio>
   <!-- 語音提示 -->
@@ -82,6 +79,9 @@
             boss.alerted = true;  // 只更新這個 BOSS 的狀態
             warningText = `<div class="warning">⚠️ ${boss.name} 即將在 1 分鐘內重生！</div>`;
           }
+
+          // 啟動定時器來更新倒數時間
+          setInterval(() => updateCountdown(boss, container), 1000);
         } else {
           countdownText = "✅ 已重生";
           boss.alerted = false;  // 重生後更新狀態
@@ -100,6 +100,25 @@
       });
     }
 
+    // 更新倒數顯示
+    function updateCountdown(boss, container) {
+      const now = new Date();
+      const respawnTime = new Date(boss.respawnTime);
+      const timeLeftMs = respawnTime - now;
+
+      if (timeLeftMs <= 0) {
+        container.querySelector('div').textContent = "✅ 已重生";
+        return;
+      }
+
+      const hours = Math.floor(timeLeftMs / 3600000);
+      const minutes = Math.floor((timeLeftMs % 3600000) / 60000);
+      const seconds = Math.floor((timeLeftMs % 60000) / 1000);
+      const countdownText = `⏳ 倒數：${hours} 小時 ${minutes} 分 ${seconds} 秒`;
+
+      container.querySelector('div').textContent = countdownText;
+    }
+
     // 根據 BOSS 名稱取得語音檔案名
     function getAudioFilename(name) {
       const mapping = {
@@ -115,14 +134,6 @@
       await fetch(`/api/boss/${bossName}/kill`, { method: "POST" });
       // 這邊不需要再次呼叫 fetchBosses()，因為會自動由 SSE 更新
     }
-
-    // 當頁面變為背景時，音效會繼續播放
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        console.log("網頁在背景中");
-        // 這邊可以在網頁變為背景時再觸發一些額外行為，例如通知
-      }
-    });
 
     // 初始載入
     fetchBosses();
