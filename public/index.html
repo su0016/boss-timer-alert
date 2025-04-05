@@ -93,6 +93,9 @@
           <button onclick="resetTime('${boss.name}')">🕹️ 點我重設出生時間</button>
         `;
 
+        // 启动倒计时更新
+        startCountdown(boss, container);
+
         bossListEl.appendChild(container);
       });
     }
@@ -114,6 +117,29 @@
 
       // 重設出生時間後，馬上刷新頁面以顯示新的倒數時間
       fetchBosses();
+    }
+
+    function startCountdown(boss, container) {
+      const now = new Date();
+      let respawnTime = new Date(boss.respawnTime);
+      const timeLeftMs = respawnTime - now;
+
+      // 如果倒數時間大於0，開始每秒更新
+      if (timeLeftMs > 0) {
+        setInterval(function() {
+          const now = new Date();
+          const timeLeftMs = respawnTime - now;
+          
+          if (timeLeftMs <= 0) return; // 如果時間到，停止倒數
+
+          const hours = Math.floor(timeLeftMs / 3600000);
+          const minutes = Math.floor((timeLeftMs % 3600000) / 60000);
+          const seconds = Math.floor((timeLeftMs % 60000) / 1000);
+
+          // 更新倒數顯示
+          container.querySelector("div").textContent = `⏳ 倒數：${hours} 小時 ${minutes} 分 ${seconds} 秒`;
+        }, 1000); // 每秒更新倒數
+      }
     }
 
     // 初始載入
