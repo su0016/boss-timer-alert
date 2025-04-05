@@ -53,7 +53,7 @@
         container.className = "boss";
 
         const lastKilled = new Date(boss.lastKilled);
-        const respawnTime = new Date(boss.respawnTime);
+        let respawnTime = new Date(boss.respawnTime);
         const timeLeftMs = respawnTime - now;
 
         let countdownText = "";
@@ -79,15 +79,12 @@
             boss.alerted = true;  // 只更新這個 BOSS 的狀態
             warningText = `<div class="warning">⚠️ ${boss.name} 即將在 1 分鐘內重生！</div>`;
           }
-
-          // 啟動定時器來更新倒數時間
-          setInterval(() => updateCountdown(boss, container), 1000);
         } else {
           countdownText = "✅ 已重生";
           boss.alerted = false;  // 重生後更新狀態
         }
 
-        container.innerHTML = `  
+        container.innerHTML = `
           <h3>${boss.name}</h3>
           ${warningText}
           <div>上次擊殺時間：${lastKilled.toLocaleString()}</div>
@@ -98,25 +95,6 @@
 
         bossListEl.appendChild(container);
       });
-    }
-
-    // 更新倒數顯示
-    function updateCountdown(boss, container) {
-      const now = new Date();
-      const respawnTime = new Date(boss.respawnTime);
-      const timeLeftMs = respawnTime - now;
-
-      if (timeLeftMs <= 0) {
-        container.querySelector('div').textContent = "✅ 已重生";
-        return;
-      }
-
-      const hours = Math.floor(timeLeftMs / 3600000);
-      const minutes = Math.floor((timeLeftMs % 3600000) / 60000);
-      const seconds = Math.floor((timeLeftMs % 60000) / 1000);
-      const countdownText = `⏳ 倒數：${hours} 小時 ${minutes} 分 ${seconds} 秒`;
-
-      container.querySelector('div').textContent = countdownText;
     }
 
     // 根據 BOSS 名稱取得語音檔案名
@@ -131,8 +109,11 @@
     }
 
     async function resetTime(bossName) {
+      // 呼叫 API 來更新 BOSS 的重生時間
       await fetch(`/api/boss/${bossName}/kill`, { method: "POST" });
-      // 這邊不需要再次呼叫 fetchBosses()，因為會自動由 SSE 更新
+
+      // 重設出生時間後，馬上刷新頁面以顯示新的倒數時間
+      fetchBosses();
     }
 
     // 初始載入
