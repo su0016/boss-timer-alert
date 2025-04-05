@@ -39,33 +39,6 @@ async function getBossData() {
   }
 }
 
-// 連接 SSE
-let clients = [];
-
-function eventsHandler(req, res) {
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.flushHeaders(); // 開始推送
-
-  clients.push(res); // 將這個連線加入到 SSE 客戶端清單中
-
-  req.on('close', () => {
-    clients = clients.filter(client => client !== res); // 客戶端關閉連線時將其移除
-  });
-}
-
-async function updateBossData() {
-  const bossData = await getBossData();
-  const message = JSON.stringify({
-    action: 'update',
-    data: bossData
-  });
-
-  // 向所有連線的客戶端推送資料
-  clients.forEach(client => client.write(`data: ${message}\n\n`));
-}
-
 // 更新 BOSS 擊殺時間及重生時間
 app.post('/api/boss/:name/kill', async (req, res) => {
   const bossName = req.params.name;
@@ -132,9 +105,6 @@ app.post('/api/boss/:name/kill', async (req, res) => {
     });
 
     res.json({ message: `BOSS ${bossName} 擊殺時間及重生時間已更新`, boss });
-
-    // 更新完成後推送給所有連線的客戶端
-    await updateBossData();
   } catch (err) {
     console.error('❌ 更新 Google Sheets 時出錯：', err);
     res.status(500).json({ error: '無法更新 Google Sheets', detail: err });
@@ -149,9 +119,6 @@ app.get('/api/bosses', async (req, res) => {
   const data = await getBossData();
   res.json(data);
 });
-
-// SSE 端點
-app.get('/events', eventsHandler);
 
 app.listen(PORT, () => {
   console.log(`🚀 伺服器啟動在 http://localhost:${PORT}`);
