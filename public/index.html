@@ -59,10 +59,27 @@
     button:hover {
       background-color: #ffa500;
     }
+
+    #refreshBtn {
+      margin-bottom: 20px;
+      padding: 10px 20px;
+      background-color: #ffa500;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #refreshBtn:hover {
+      background-color: #ff6347;
+    }
   </style>
 </head>
 <body>
   <h1>🎯 BOSS 提示系統</h1>
+
+  <!-- 🔹 刷新介面的按鈕 -->
+  <button id="refreshBtn" onclick="refreshPage()">刷新介面</button>
 
   <!-- 🔹 導覽欄 -->
   <div id="nav">
@@ -129,7 +146,7 @@
             }
 
             boss.alerted = true;
-            warningText = `<div class="warning">⚠️ ${boss.name} 即將在 1 分鐘內重生！</div>`;
+            warningText = `<div class="warning">⚠️ ${boss.name} 即將在 1 分鐘內重生！</div>`; 
           }
         } else {
           countdownText = "✅ 已重生";
@@ -176,6 +193,11 @@
     function enableSound() {
       alertSound.play();
       voiceSound.play();
+    }
+
+    // 刷新頁面
+    function refreshPage() {
+      location.reload();
     }
 
     // 初始載入 + 每秒更新畫面
