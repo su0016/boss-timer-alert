@@ -53,9 +53,18 @@ app.post('/api/boss/:name/kill', async (req, res) => {
 
   // 更新 BOSS 擊殺時間
   boss.lastKilled = now;
-  
-  // 假設 BOSS重置時間設為 2 分鐘 (120秒)
-  const resetTimeInMinutes = 2; // 設置為 2 分鐘
+
+  // 取得重置時間 (A4)
+  const resetTime = boss.resetTime; // 假設是類似 "12 小時" 的字串
+
+  let resetTimeInMinutes = 0;
+
+  if (resetTime.includes("小時")) {
+    resetTimeInMinutes = parseInt(resetTime.replace(" 小時", "")) * 60; // 將小時轉換為分鐘
+  } else if (resetTime.includes("分鐘")) {
+    resetTimeInMinutes = parseInt(resetTime.replace(" 分鐘", ""));
+  }
+
   const respawnTime = new Date(new Date(boss.lastKilled).getTime() + resetTimeInMinutes * 60 * 1000); // 重生時間
   boss.respawnTime = respawnTime.toISOString(); // 計算並存入重生時間
 
@@ -91,7 +100,7 @@ app.post('/api/boss/:name/kill', async (req, res) => {
       range: updateRangeResetTime,
       valueInputOption: 'RAW',
       requestBody: {
-        values: [["2 分鐘"]], // 設置 BOSS 重置時間為 2 分鐘
+        values: [[resetTime]], // 儲存 A4 的重置時間
       },
     });
 
