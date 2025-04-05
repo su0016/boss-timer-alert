@@ -81,7 +81,7 @@
           <div>上次擊殺時間：${lastKilled.toLocaleString()}</div>
           <div>下一次重生時間：${respawnTime.toLocaleString()}</div>
           <div>${countdownText}</div>
-          <button onclick="resetTime('${boss.id}')">🕹️ 點我重設出生時間</button>
+          <button onclick="resetTime('${boss.name}')">🕹️ 點我重設出生時間</button>
         `;
 
         bossListEl.appendChild(container);
@@ -99,8 +99,8 @@
       return mapping[name] || null;
     }
 
-    async function resetTime(bossId) {
-      await fetch(`/api/boss/${bossId}/kill`, { method: "POST" });
+    async function resetTime(bossName) {
+      await fetch(`/api/boss/${bossName}/kill`, { method: "POST" });
       await fetchBosses();
     }
 
