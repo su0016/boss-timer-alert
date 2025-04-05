@@ -104,6 +104,14 @@
       await fetchBosses();  // 重設後重新載入 BOSS 資料
     }
 
+    // 當頁面變為背景時，音效會繼續播放
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        console.log("網頁在背景中");
+        // 這邊可以在網頁變為背景時再觸發一些額外行為，例如通知
+      }
+    });
+
     // 初始載入 + 每秒更新畫面
     fetchBosses();
     setInterval(updateBossList, 1000);
