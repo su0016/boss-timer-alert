@@ -29,6 +29,15 @@
 
     let bossData = [];
 
+    // 設置 SSE 來接收伺服器推送的資料
+    const eventSource = new EventSource('/events');
+    eventSource.onmessage = function(event) {
+      const message = JSON.parse(event.data);
+      if (message.action === 'update') {
+        fetchBosses();  // 收到更新事件後重新加載 BOSS 資料
+      }
+    };
+
     async function fetchBosses() {
       const res = await fetch("/api/bosses");
       bossData = await res.json();
@@ -101,7 +110,7 @@
 
     async function resetTime(bossName) {
       await fetch(`/api/boss/${bossName}/kill`, { method: "POST" });
-      await fetchBosses();  // 重設後重新載入 BOSS 資料
+      // 這邊不需要再次呼叫 fetchBosses()，因為會自動由 SSE 更新
     }
 
     // 當頁面變為背景時，音效會繼續播放
@@ -112,9 +121,8 @@
       }
     });
 
-    // 初始載入 + 每秒更新畫面
+    // 初始載入
     fetchBosses();
-    setInterval(updateBossList, 1000);
   </script>
 </body>
 </html>
