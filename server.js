@@ -24,7 +24,7 @@ async function getBossData() {
     const response = await sheets.spreadsheets.values.get({
       auth,
       spreadsheetId: SPREADSHEET_ID,
-      range: 'Sheet1!A2:B', // 假設資料從第2行開始
+      range: 'bossdata!A2:B', // 使用新的工作表名稱 bossdata
     });
 
     return response.data.values.map(row => ({
@@ -62,7 +62,7 @@ app.post('/api/boss/:name/kill', async (req, res) => {
 
   // 更新 Google Sheets
   try {
-    const updateRange = `Sheet1!B${data.findIndex(b => b.name === bossName) + 2}`; // 將 BOSS 擊殺時間更新到相應位置
+    const updateRange = `bossdata!B${data.findIndex(b => b.name === bossName) + 2}`; // 將 BOSS 擊殺時間更新到相應位置
     const updateRes = await sheets.spreadsheets.values.update({
       auth,
       spreadsheetId: SPREADSHEET_ID,
