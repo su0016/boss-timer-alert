@@ -3,23 +3,80 @@
 <head>
   <meta charset="UTF-8" />
   <title>BOSS 提示系統</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    .boss { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 8px; }
-    .warning { color: red; font-weight: bold; }
-    button { padding: 5px 10px; }
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background-color: #0d1117;
+      color: #00ffcc;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00ffc8;
+      text-shadow: 0 0 8px #00ffc8;
+      font-size: 32px;
+    }
+
+    .boss {
+      border: 1px solid #00ffc8;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      background-color: rgba(0, 255, 200, 0.05);
+      box-shadow: 0 0 10px rgba(0, 255, 200, 0.2);
+      transition: transform 0.3s;
+    }
+
+    .boss:hover {
+      transform: scale(1.01);
+      box-shadow: 0 0 20px rgba(0, 255, 200, 0.3);
+    }
+
+    .warning {
+      color: #ff0066;
+      font-weight: bold;
+      text-shadow: 0 0 6px #ff0066;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 6px;
+      background-color: #00ffc8;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 0 10px #00ffc8;
+    }
+
+    button:hover {
+      background-color: #0ff;
+      box-shadow: 0 0 15px #0ff;
+    }
+
+    #bossList {
+      margin-top: 20px;
+    }
+
+    audio {
+      display: none;
+    }
   </style>
 </head>
 <body>
   <h1>🎯 BOSS 提示系統</h1>
   <div id="bossList">載入中...</div>
 
-  <!-- 添加啟用音效的按鈕 -->
-  <button onclick="enableSound()">啟用音效</button>
-  
-  <!-- 預設音效 -->
+  <div style="text-align: center; margin-top: 20px;">
+    <button onclick="enableSound()">🔊 啟用音效</button>
+  </div>
+
   <audio id="alertSound" src="/sounds/default.mp3" preload="auto"></audio>
-  <!-- 語音提示 -->
   <audio id="voiceSound" preload="auto"></audio>
 
   <script>
@@ -56,31 +113,30 @@
           const seconds = Math.floor((timeLeftMs % 60000) / 1000);
           countdownText = `⏳ 倒數：${hours} 小時 ${minutes} 分 ${seconds} 秒`;
 
-          // 提示音效 (1分鐘內)
           if (timeLeftMs < 60000 && !boss.alerted) {
             alertSound.play();
 
-            // 播放語音提示
             const audioName = getAudioFilename(boss.name);
             if (audioName) {
               voiceSound.src = `/sounds/${audioName}`;
               voiceSound.play();
             }
 
-            boss.alerted = true;  // 只更新這個 BOSS 的狀態
+            boss.alerted = true;
             warningText = `<div class="warning">⚠️ ${boss.name} 即將在 1 分鐘內重生！</div>`;
           }
         } else {
           countdownText = "✅ 已重生";
-          boss.alerted = false;  // 重生後更新狀態
+          boss.alerted = false;
         }
 
         container.innerHTML = `
           <h3>${boss.name}</h3>
           ${warningText}
-          <div>上次擊殺時間：${lastKilled.toLocaleString()}</div>
-          <div>下一次重生時間：${respawnTime.toLocaleString()}</div>
+          <div>🕒 上次擊殺時間：${lastKilled.toLocaleString()}</div>
+          <div>🔄 下一次重生時間：${respawnTime.toLocaleString()}</div>
           <div>${countdownText}</div>
+          <br />
           <button onclick="resetTime('${boss.name}')">🕹️ 點我重設出生時間</button>
         `;
 
@@ -88,7 +144,6 @@
       });
     }
 
-    // 根據 BOSS 名稱取得語音檔案名
     function getAudioFilename(name) {
       const mapping = {
         "飛龍1": "Fly1.mp3",
@@ -101,18 +156,19 @@
 
     async function resetTime(bossName) {
       await fetch(`/api/boss/${bossName}/kill`, { method: "POST" });
-      await fetchBosses();  // 重設後重新載入 BOSS 資料
+      await fetchBosses();
     }
 
-    // 當頁面變為背景時，音效會繼續播放
+    function enableSound() {
+      alertSound.play().catch(() => {});
+    }
+
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
-        console.log("網頁在背景中");
-        // 這邊可以在網頁變為背景時再觸發一些額外行為，例如通知
+        console.log("頁面在背景中");
       }
     });
 
-    // 初始載入 + 每秒更新畫面
     fetchBosses();
     setInterval(updateBossList, 1000);
   </script>
