@@ -44,8 +44,7 @@
         container.className = "boss";
 
         const lastKilled = new Date(boss.lastKilled);
-        // 計算下一次重生時間（假設從擊殺時間開始加2分鐘）
-        const respawnTime = new Date(lastKilled.getTime() + 2 * 60 * 1000); // 假設2分鐘後重生
+        const respawnTime = new Date(boss.respawnTime);
         const timeLeftMs = respawnTime - now;
 
         let countdownText = "";
