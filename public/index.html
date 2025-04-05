@@ -67,12 +67,12 @@
               voiceSound.play();
             }
 
-            boss.alerted = true;
+            boss.alerted = true;  // 只更新這個 BOSS 的狀態
             warningText = `<div class="warning">⚠️ ${boss.name} 即將在 1 分鐘內重生！</div>`;
           }
         } else {
           countdownText = "✅ 已重生";
-          boss.alerted = false;
+          boss.alerted = false;  // 重生後更新狀態
         }
 
         container.innerHTML = `
@@ -101,7 +101,7 @@
 
     async function resetTime(bossName) {
       await fetch(`/api/boss/${bossName}/kill`, { method: "POST" });
-      await fetchBosses();
+      await fetchBosses();  // 重設後重新載入 BOSS 資料
     }
 
     // 初始載入 + 每秒更新畫面
