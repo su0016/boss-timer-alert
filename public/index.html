@@ -3,124 +3,119 @@
 <head>
   <meta charset="UTF-8" />
   <title>BOSS 提示系統</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
-      color: #f8f8f8;
-      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
       padding: 20px;
+      background: #0d1117;
+      color: #e6edf3;
     }
 
     h1 {
       text-align: center;
-      color: #00f7ff;
-      margin-bottom: 10px;
-    }
-
-    #nav {
-      position: sticky;
-      top: 0;
-      background: rgba(13, 17, 23, 0.8);
-      backdrop-filter: blur(5px);
-      padding: 10px;
-      z-index: 100;
-      border-bottom: 1px solid #00ffc8;
-      margin-bottom: 20px;
-      overflow-x: auto;
-      white-space: nowrap;
-    }
-
-    #nav a {
-      margin: 0 8px;
       color: #00ffc8;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    #nav a:hover {
-      color: #ff9800;
-      text-shadow: 0 0 5px #fff;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 20px;
-    }
-
-    .boss {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      padding: 20px;
-      backdrop-filter: blur(8px);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .boss:hover {
-      transform: scale(1.03);
-      box-shadow: 0 0 20px #00ffc8;
-    }
-
-    .warning {
-      color: #ff4c4c;
-      font-weight: bold;
-      margin: 10px 0;
-      animation: flash 1s infinite;
-    }
-
-    @keyframes flash {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
-    button {
-      padding: 8px 12px;
-      margin: 5px 5px 0 0;
-      background: linear-gradient(135deg, #00ffc8, #007bff);
-      border: none;
-      border-radius: 8px;
-      color: #fff;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    button:hover {
-      background: linear-gradient(135deg, #ff9800, #ff5722);
-      transform: translateY(-1px);
-      box-shadow: 0 0 10px #ffa500;
+      margin-bottom: 5px;
     }
 
     #refreshBtn {
       display: block;
-      margin: 0 auto 20px auto;
-      padding: 12px 25px;
-      font-size: 18px;
-      background: linear-gradient(135deg, #ff9800, #ff5722);
-      border-radius: 30px;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #ffa500;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      color: #1e1e1e;
+      font-weight: bold;
     }
 
     #refreshBtn:hover {
-      background: linear-gradient(135deg, #ff5722, #e91e63);
+      background-color: #ff6347;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 20px;
+    }
+
+    .boss {
+      border: 1px solid #2f2f2f;
+      padding: 20px;
+      border-radius: 12px;
+      background: #161b22;
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+
+    .boss:hover {
+      transform: scale(1.02);
+      background: #1e232a;
+    }
+
+    .boss h3 {
+      margin-top: 0;
+      color: #58a6ff;
+    }
+
+    .warning {
+      color: #ff4d4d;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .button-group button {
+      flex: 1 1 calc(33.333% - 10px);
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+      background-color: #00ffc8;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .button-group button:hover {
+      background-color: #ffa500;
+      color: #000;
+    }
+
+    /* 音效按鈕 */
+    #soundBtn {
+      display: block;
+      margin: 20px auto;
+      padding: 8px 16px;
+      background-color: #00ffc8;
+      border: none;
+      border-radius: 8px;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #soundBtn:hover {
+      background-color: #ffa500;
     }
   </style>
 </head>
 <body>
   <h1>🎯 BOSS 提示系統</h1>
   <h1>🎯 5塊錢 專用</h1>
-  <button id="refreshBtn" onclick="refreshPage()">刷新介面</button>
 
-  <div id="nav">
-    快速跳轉：
-    <span id="navLinks"></span>
-  </div>
+  <button id="refreshBtn" onclick="refreshPage()">刷新介面</button>
 
   <div id="bossList" class="grid">載入中...</div>
 
-  <button onclick="enableSound()">🔊 啟用音效</button>
+  <button id="soundBtn" onclick="enableSound()">啟用音效</button>
+
   <audio id="alertSound" src="/sounds/default.mp3" preload="auto"></audio>
   <audio id="voiceSound" preload="auto"></audio>
 
@@ -141,13 +136,9 @@
       bossListEl.innerHTML = "";
       const now = new Date();
 
-      const navLinksEl = document.getElementById("navLinks");
-      navLinksEl.innerHTML = "";
-
       bossData.forEach(boss => {
         const container = document.createElement("div");
         container.className = "boss";
-        container.id = `boss-${boss.name}`;
 
         const lastKilled = new Date(boss.lastKilled);
         const respawnTime = new Date(boss.respawnTime);
@@ -185,18 +176,14 @@
           <div>🕒 上次擊殺時間：${lastKilled.toLocaleString()}</div>
           <div>🔄 下一次重生時間：${respawnTime.toLocaleString()}</div>
           <div>${countdownText}</div>
-          <br />
-          <button onclick="resetTime('${boss.name}')">🕹️ 重設時間</button>
-          <button onclick="adjustRespawnTime('${boss.name}', 1)">➕ 加1分鐘</button>
-          <button onclick="adjustRespawnTime('${boss.name}', -1)">➖ 減1分鐘</button>
+          <div class="button-group">
+            <button onclick="resetTime('${boss.name}')">重設時間</button>
+            <button onclick="adjustRespawnTime('${boss.name}', 1)">+1 分鐘</button>
+            <button onclick="adjustRespawnTime('${boss.name}', -1)">-1 分鐘</button>
+          </div>
         `;
 
         bossListEl.appendChild(container);
-
-        const link = document.createElement("a");
-        link.href = `#boss-${boss.name}`;
-        link.textContent = boss.name;
-        navLinksEl.appendChild(link);
       });
     }
 
