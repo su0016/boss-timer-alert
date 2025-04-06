@@ -161,6 +161,8 @@
           <div>${countdownText}</div>
           <br />
           <button onclick="resetTime('${boss.name}')">🕹️ 點我重設出生時間</button>
+          <button onclick="adjustRespawnTime('${boss.name}', 1)">➕ 增加1分鐘重生時間</button>
+          <button onclick="adjustRespawnTime('${boss.name}', -1)">➖ 減少1分鐘重生時間</button>
         `;
 
         bossListEl.appendChild(container);
@@ -202,6 +204,20 @@
       return mapping[name] || null;
     }
 
+  async function adjustRespawnTime(bossName, minutes) {
+  await fetch(`/api/boss/${bossName}/adjustRespawnTime`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ minutes })
+  });
+  await fetchBosses();  // 調整後重新載入 BOSS 資料
+  }
+
+
+
+    
     async function resetTime(bossName) {
       await fetch(`/api/boss/${bossName}/kill`, { method: "POST" });
       await fetchBosses();  // 重設後重新載入 BOSS 資料
