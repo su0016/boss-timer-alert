@@ -104,17 +104,61 @@
     #soundBtn:hover {
       background-color: #ffa500;
     }
+
+    /* 登入表單樣式 */
+    #loginForm {
+      max-width: 300px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .error-message {
+      color: red;
+      display: none;
+    }
   </style>
 </head>
 <body>
+  <!-- 登入表單 -->
+  <div id="loginForm">
+    <h2>登入</h2>
+    <input type="text" id="username" placeholder="帳號" required />
+    <input type="password" id="password" placeholder="密碼" required />
+    <button onclick="loginUser()">登入</button>
+    <p id="errorMessage" class="error-message">帳號或密碼錯誤</p>
+  </div>
+
+  <!-- 主內容頁 -->
   <h1>🎯 BOSS 提示系統</h1>
   <h1>🎯 5塊錢 專用</h1>
 
-  <button id="refreshBtn" onclick="refreshPage()">刷新介面</button>
+  <button id="refreshBtn" onclick="refreshPage()" style="display: none;">刷新介面</button>
 
   <div id="bossList" class="grid">載入中...</div>
 
-  <button id="soundBtn" onclick="enableSound()">啟用音效</button>
+  <button id="soundBtn" onclick="enableSound()" style="display: none;">啟用音效</button>
 
   <audio id="alertSound" src="/sounds/default.mp3" preload="auto"></audio>
   <audio id="voiceSound" preload="auto"></audio>
@@ -123,19 +167,45 @@
     const bossListEl = document.getElementById("bossList");
     const alertSound = document.getElementById("alertSound");
     const voiceSound = document.getElementById("voiceSound");
+    const loginForm = document.getElementById("loginForm");
+    const errorMessage = document.getElementById("errorMessage");
 
     let bossData = [];
+
+    // 檢查是否已經登入
+    window.onload = function() {
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      if (isLoggedIn === 'true') {
+        document.getElementById("refreshBtn").style.display = "block";
+        document.getElementById("soundBtn").style.display = "block";
+        fetchBosses();
+      } else {
+        loginForm.style.display = "block";
+      }
+    };
+
+    // 登入邏輯
+    function loginUser() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      // 登入帳號密碼設定為 0000 / 5678
+      if (username === '0000' && password === '5678') {
+        localStorage.setItem('isLoggedIn', 'true');
+        loginForm.style.display = "none";
+        document.getElementById("refreshBtn").style.display = "block";
+        document.getElementById("soundBtn").style.display = "block";
+        fetchBosses();
+      } else {
+        errorMessage.style.display = "block";
+      }
+    }
 
     async function fetchBosses() {
       const res = await fetch("/api/bosses");
       bossData = await res.json();
       updateBossList();
     }
-
-    // 每60秒自動刷新一次頁面
-   setInterval(function() {
-   location.reload(); // 刷新頁面
-   }, 60000); // 60000 毫秒，即 1 分鐘
 
     function updateBossList() {
       bossListEl.innerHTML = "";
@@ -220,31 +290,23 @@
       return mapping[name] || null;
     }
 
-    async function adjustRespawnTime(bossName, minutes) {
-      await fetch(`/api/boss/${bossName}/adjustRespawnTime`, {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ minutes })
-      });
-      await fetchBosses();
-    }
-
-    async function resetTime(bossName) {
-      await fetch(`/api/boss/${bossName}/kill`, { method: "POST" });
-      await fetchBosses();
+    function refreshPage() {
+      fetchBosses();
     }
 
     function enableSound() {
       alertSound.play();
-      voiceSound.play();
     }
 
-    function refreshPage() {
-      location.reload();
+    function resetTime(bossName) {
+      alert("將重設 " + bossName + " 的時間。");
+      // 實作時間重設邏輯
     }
 
-    fetchBosses();
-    setInterval(updateBossList, 1000);
+    function adjustRespawnTime(bossName, minutes) {
+      alert("將調整 " + bossName + " 的重生時間 " + minutes + " 分鐘。");
+      // 實作重生時間調整邏輯
+    }
   </script>
 </body>
 </html>
