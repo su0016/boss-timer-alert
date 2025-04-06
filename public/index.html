@@ -174,32 +174,33 @@
 
     // 檢查是否已經登入
     window.onload = function() {
-      const isLoggedIn = localStorage.getItem('isLoggedIn');
-      if (isLoggedIn === 'true') {
-        document.getElementById("refreshBtn").style.display = "block";
-        document.getElementById("soundBtn").style.display = "block";
-        fetchBosses();
-      } else {
-        loginForm.style.display = "block";
-      }
-    };
+  const isLoggedIn = localStorage.getItem('isLoggedIn');
+  if (isLoggedIn === 'true') {
+    document.getElementById("refreshBtn").style.display = "block";
+    document.getElementById("soundBtn").style.display = "block";
+    fetchBosses();  // 這裡是登入後才會載入BOSS資料
+  } else {
+    loginForm.style.display = "block";  // 顯示登入表單
+  }
+};
 
-    // 登入邏輯
-    function loginUser() {
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
+// 登入邏輯
+function loginUser() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
 
-      // 登入帳號密碼設定為 0000 / 5678
-      if (username === '0000' && password === '5678') {
-        localStorage.setItem('isLoggedIn', 'true');
-        loginForm.style.display = "none";
-        document.getElementById("refreshBtn").style.display = "block";
-        document.getElementById("soundBtn").style.display = "block";
-        fetchBosses();
-      } else {
-        errorMessage.style.display = "block";
-      }
-    }
+  // 登入帳號密碼設定為 0000 / 5678
+  if (username === '0000' && password === '5678') {
+    localStorage.setItem('isLoggedIn', 'true');
+    loginForm.style.display = "none";  // 隱藏登入表單
+    document.getElementById("refreshBtn").style.display = "block";  // 顯示刷新按鈕
+    document.getElementById("soundBtn").style.display = "block";  // 顯示音效按鈕
+    fetchBosses();  // 登入後載入BOSS資料
+  } else {
+    errorMessage.style.display = "block";  // 顯示錯誤訊息
+  }
+}
+
 
     async function fetchBosses() {
       const res = await fetch("/api/bosses");
