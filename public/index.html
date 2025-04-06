@@ -290,23 +290,31 @@
       return mapping[name] || null;
     }
 
-    function refreshPage() {
-      fetchBosses();
+        async function adjustRespawnTime(bossName, minutes) {
+      await fetch(`/api/boss/${bossName}/adjustRespawnTime`, {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ minutes })
+      });
+      await fetchBosses();
+    }
+
+    async function resetTime(bossName) {
+      await fetch(`/api/boss/${bossName}/kill`, { method: "POST" });
+      await fetchBosses();
     }
 
     function enableSound() {
       alertSound.play();
+      voiceSound.play();
     }
 
-    function resetTime(bossName) {
-      alert("將重設 " + bossName + " 的時間。");
-      // 實作時間重設邏輯
+    function refreshPage() {
+      location.reload();
     }
 
-    function adjustRespawnTime(bossName, minutes) {
-      alert("將調整 " + bossName + " 的重生時間 " + minutes + " 分鐘。");
-      // 實作重生時間調整邏輯
-    }
+    fetchBosses();
+    setInterval(updateBossList, 1000);
   </script>
 </body>
 </html>
