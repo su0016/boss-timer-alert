@@ -227,6 +227,13 @@ function loginUser() {
       bossListEl.innerHTML = "";
       const now = new Date();
 
+  // 先排序 bossData，將倒數時間較短的BOSS排在前面
+    bossData.sort((a, b) => {
+    const timeLeftA = new Date(a.respawnTime) - now;
+    const timeLeftB = new Date(b.respawnTime) - now;
+    return timeLeftA - timeLeftB; // 倒數時間較短的排前面
+    });
+      
       bossData.forEach(boss => {
         const container = document.createElement("div");
         container.className = "boss";
