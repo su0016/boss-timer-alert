@@ -174,6 +174,28 @@ app.post('/api/boss/:name/adjustRespawnTime', async (req, res) => {
   }
 });
 
+// 每 1 分鐘檢查 BOSS 是否即將重生
+setInterval(async () => {
+  try {
+    const data = await getBossData();
+    
+    data.forEach(async (boss) => {
+      const respawnTime = new Date(boss.respawnTime);
+      const now = new Date();
+
+      // 計算重生時間與現在時間的差距
+      const timeDiff = respawnTime - now;
+
+      // 如果 BOSS 重生時間距離現在小於等於 1 分鐘（60,000 毫秒），發送通知
+      if (timeDiff <= 60000 && timeDiff > 0) {
+        await sendDiscordNotification(boss.name, `🚨 BOSS ${boss.name} 即將重生！剩餘時間：1 分鐘`);
+      }
+    });
+  } catch (err) {
+    console.error('❌ 檢查 BOSS 重生時間時出錯：', err);
+  }
+}, 60000); // 每 1 分鐘檢查一次
+
 app.listen(PORT, () => {
   console.log(`🚀 伺服器啟動在 http://localhost:${PORT}`);
 });
