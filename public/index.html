@@ -104,16 +104,6 @@
     #soundBtn:hover {
       background-color: #ffa500;
     }
-
-    .group-header {
-      background: #2f363d;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 6px;
-      font-size: 18px;
-      color: #00ffc8;
-      font-weight: bold;
-    }
   </style>
 </head>
 <body>
@@ -146,31 +136,13 @@
       bossListEl.innerHTML = "";
       const now = new Date();
 
-      // 分組：以 4 小時和 8 小時為例
-      const group1 = bossData.filter(boss => boss.respawnInterval === 4);
-      const group2 = bossData.filter(boss => boss.respawnInterval === 8);
-      const group3 = bossData.filter(boss => boss.respawnInterval === 24);
-
-      renderGroup("4 小時重生", group1);
-      renderGroup("8 小時重生", group2);
-      renderGroup("24 小時重生", group3);
-    }
-
-    function renderGroup(groupName, groupData) {
-      const groupContainer = document.createElement("div");
-      const groupHeader = document.createElement("div");
-      groupHeader.classList.add("group-header");
-      groupHeader.textContent = groupName;
-
-      groupContainer.appendChild(groupHeader);
-
-      groupData.forEach(boss => {
+      bossData.forEach(boss => {
         const container = document.createElement("div");
         container.className = "boss";
 
         const lastKilled = new Date(boss.lastKilled);
         const respawnTime = new Date(boss.respawnTime);
-        const timeLeftMs = respawnTime - new Date();
+        const timeLeftMs = respawnTime - now;
 
         let countdownText = "";
         let warningText = "";
@@ -211,10 +183,8 @@
           </div>
         `;
 
-        groupContainer.appendChild(container);
+        bossListEl.appendChild(container);
       });
-
-      bossListEl.appendChild(groupContainer);
     }
 
     function getAudioFilename(name) {
