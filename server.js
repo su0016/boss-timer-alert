@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 const GOOGLE_SHEETS_CREDENTIALS = JSON.parse(process.env.GOOGLE_SHEETS_CREDENTIALS);
 const SPREADSHEET_ID = '1FBZ7Div_p4KnphgaY-5UB0cxs8_n9B27Ry29reDN7EU'; // 你的 Google Sheet ID
+const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL; // 你的 Discord Webhook URL
 
 const sheets = google.sheets('v4');
 const auth = new google.auth.JWT(
@@ -39,6 +40,29 @@ async function getBossData() {
   } catch (error) {
     console.error('❌ 無法讀取 Google Sheets', error);
     return [];
+  }
+}
+
+// 送出推播訊息到 Discord
+async function sendDiscordNotification(bossName, message) {
+  if (!DISCORD_WEBHOOK_URL) {
+    console.error('❌ 未設定 Discord Webhook URL');
+    return;
+  }
+
+  const payload = {
+    content: `🚨 BOSS 更新通知: ${bossName} - ${message}`,
+  };
+
+  try {
+    await fetch(DISCORD_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    console.log('✅ 成功推播到 Discord');
+  } catch (err) {
+    console.error('❌ 推播到 Discord 時出錯：', err);
   }
 }
 
@@ -98,6 +122,9 @@ app.post('/api/boss/:name/kill', async (req, res) => {
       requestBody: { values: [[resetTime]] },
     });
 
+    // 送出 Discord 推播
+    await sendDiscordNotification(bossName, `BOSS ${bossName} 擊殺時間及重生時間已更新`);
+
     res.json({ message: `BOSS ${bossName} 擊殺時間及重生時間已更新`, boss });
   } catch (err) {
     console.error('❌ 更新 Google Sheets 時出錯：', err);
@@ -136,6 +163,9 @@ app.post('/api/boss/:name/adjustRespawnTime', async (req, res) => {
         values: [[boss.respawnTime]],
       },
     });
+
+    // 送出 Discord 推播
+    await sendDiscordNotification(bossName, `已調整 ${bossName} 的重生時間`);
 
     res.json({ message: `已調整 ${bossName} 的重生時間`, boss });
   } catch (err) {
