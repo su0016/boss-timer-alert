@@ -178,7 +178,7 @@
   if (isLoggedIn === 'true') {
     document.getElementById("refreshBtn").style.display = "block";
     document.getElementById("soundBtn").style.display = "block";
-    //fetchBosses();  // 這裡是登入後才會載入BOSS資料
+    fetchBosses();  // 這裡是登入後才會載入BOSS資料
   } else {
     loginForm.style.display = "block";  // 顯示登入表單
   }
@@ -206,6 +206,10 @@ function loginUser() {
       const res = await fetch("/api/bosses");
       bossData = await res.json();
       updateBossList();
+
+      setInterval(() => {
+    updateBossList();
+    }, 1000);
     }
 
     function updateBossList() {
@@ -314,8 +318,7 @@ function loginUser() {
       location.reload();
     }
 
-    fetchBosses();
-    setInterval(updateBossList, 1000);
+  
   </script>
 </body>
 </html>
