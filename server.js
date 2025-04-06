@@ -18,13 +18,16 @@ const auth = new google.auth.JWT(
   null
 );
 
+app.use(express.json());
+app.use(express.static('public'));
+
 // 連接到 Google Sheets
 async function getBossData() {
   try {
     const response = await sheets.spreadsheets.values.get({
       auth,
       spreadsheetId: SPREADSHEET_ID,
-      range: 'bossdata!A2:D', // 這裡假設BOSS數據在A列到D列，從第2行開始
+      range: 'bossdata!A2:D', // 假設BOSS數據在A-D列，從第2行開始
     });
 
     return response.data.values.map(row => ({
@@ -39,10 +42,16 @@ async function getBossData() {
   }
 }
 
+// 獲取 BOSS 資料
+app.get('/api/bosses', async (req, res) => {
+  const data = await getBossData();
+  res.json(data);
+});
+
 // 更新 BOSS 擊殺時間及重生時間
 app.post('/api/boss/:name/kill', async (req, res) => {
   const bossName = req.params.name;
-  const now = new Date().toISOString(); // 記錄當前擊殺時間
+  const now = new Date().toISOString();
 
   let data = await getBossData();
   const boss = data.find(b => b.name === bossName);
@@ -51,57 +60,42 @@ app.post('/api/boss/:name/kill', async (req, res) => {
     return res.status(404).json({ error: `找不到名為 ${bossName} 的 BOSS` });
   }
 
-  // 更新 BOSS 擊殺時間
   boss.lastKilled = now;
 
-  // 取得重置時間 (A4)
-  const resetTime = boss.resetTime; // 假設是類似 "12 小時" 的字串
-
+  const resetTime = boss.resetTime;
   let resetTimeInMinutes = 0;
 
   if (resetTime.includes("小時")) {
-    resetTimeInMinutes = parseInt(resetTime.replace(" 小時", "")) * 60; // 將小時轉換為分鐘
+    resetTimeInMinutes = parseInt(resetTime.replace(" 小時", "")) * 60;
   } else if (resetTime.includes("分鐘")) {
     resetTimeInMinutes = parseInt(resetTime.replace(" 分鐘", ""));
   }
 
-  const respawnTime = new Date(new Date(boss.lastKilled).getTime() + resetTimeInMinutes * 60 * 1000); // 重生時間
-  boss.respawnTime = respawnTime.toISOString(); // 計算並存入重生時間
+  const respawnTime = new Date(new Date(boss.lastKilled).getTime() + resetTimeInMinutes * 60 * 1000);
+  boss.respawnTime = respawnTime.toISOString();
 
-  // 更新 Google Sheets
   try {
-    const updateRangeLastKilled = `bossdata!B${data.findIndex(b => b.name === bossName) + 2}`; // 擊殺時間所在的單元格
-    const updateRangeRespawnTime = `bossdata!C${data.findIndex(b => b.name === bossName) + 2}`; // 重生時間所在的單元格
-    const updateRangeResetTime = `bossdata!D${data.findIndex(b => b.name === bossName) + 2}`; // 重置時間所在的單元格
-
+    const rowIndex = data.findIndex(b => b.name === bossName) + 2;
     await sheets.spreadsheets.values.update({
       auth,
       spreadsheetId: SPREADSHEET_ID,
-      range: updateRangeLastKilled,
+      range: `bossdata!B${rowIndex}`,
       valueInputOption: 'RAW',
-      requestBody: {
-        values: [[now]],
-      },
+      requestBody: { values: [[now]] },
     });
-
     await sheets.spreadsheets.values.update({
       auth,
       spreadsheetId: SPREADSHEET_ID,
-      range: updateRangeRespawnTime,
+      range: `bossdata!C${rowIndex}`,
       valueInputOption: 'RAW',
-      requestBody: {
-        values: [[boss.respawnTime]],
-      },
+      requestBody: { values: [[boss.respawnTime]] },
     });
-
     await sheets.spreadsheets.values.update({
       auth,
       spreadsheetId: SPREADSHEET_ID,
-      range: updateRangeResetTime,
+      range: `bossdata!D${rowIndex}`,
       valueInputOption: 'RAW',
-      requestBody: {
-        values: [[resetTime]], // 儲存 A4 的重置時間
-      },
+      requestBody: { values: [[resetTime]] },
     });
 
     res.json({ message: `BOSS ${bossName} 擊殺時間及重生時間已更新`, boss });
@@ -111,13 +105,43 @@ app.post('/api/boss/:name/kill', async (req, res) => {
   }
 });
 
-app.use(express.json());
-app.use(express.static('public'));
+// ✅ 新增：調整 BOSS 重生時間的 API（增加或減少分鐘）
+app.post('/api/boss/:name/adjustRespawnTime', async (req, res) => {
+  const bossName = req.params.name;
+  const { minutes } = req.body;
 
-// 獲取 BOSS 資料
-app.get('/api/bosses', async (req, res) => {
-  const data = await getBossData();
-  res.json(data);
+  if (typeof minutes !== 'number') {
+    return res.status(400).json({ error: 'minutes 必須是數字' });
+  }
+
+  let data = await getBossData();
+  const boss = data.find(b => b.name === bossName);
+
+  if (!boss || !boss.respawnTime) {
+    return res.status(404).json({ error: `找不到名為 ${bossName} 的 BOSS 或尚未設定重生時間` });
+  }
+
+  const currentRespawnTime = new Date(boss.respawnTime);
+  const adjustedRespawnTime = new Date(currentRespawnTime.getTime() + minutes * 60 * 1000);
+  boss.respawnTime = adjustedRespawnTime.toISOString();
+
+  try {
+    const rowIndex = data.findIndex(b => b.name === bossName) + 2;
+    await sheets.spreadsheets.values.update({
+      auth,
+      spreadsheetId: SPREADSHEET_ID,
+      range: `bossdata!C${rowIndex}`,
+      valueInputOption: 'RAW',
+      requestBody: {
+        values: [[boss.respawnTime]],
+      },
+    });
+
+    res.json({ message: `已調整 ${bossName} 的重生時間`, boss });
+  } catch (err) {
+    console.error('❌ 更新 Google Sheets 時出錯：', err);
+    res.status(500).json({ error: '無法更新 Google Sheets', detail: err });
+  }
 });
 
 app.listen(PORT, () => {
