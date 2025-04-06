@@ -132,6 +132,11 @@
       updateBossList();
     }
 
+    // 每60秒自動刷新一次頁面
+   setInterval(function() {
+   location.reload(); // 刷新頁面
+   }, 60000); // 60000 毫秒，即 1 分鐘
+
     function updateBossList() {
       bossListEl.innerHTML = "";
       const now = new Date();
