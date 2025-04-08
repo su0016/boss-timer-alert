@@ -27,9 +27,9 @@
       border-radius: 16px;
       padding: 2rem;
       box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-      display: flex;
-      flex-wrap: nowrap;  /* 禁止換行，強制讓所有內容橫向排列 */
-      overflow-x: auto;  /* 滑動條顯示，讓內容可以左右滑動 */
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));  /* 自動排列每個 BOSS 區塊 */
+      grid-gap: 1.5rem;  /* 設定格子間距 */
     }
 
     /* 標題 */
@@ -39,7 +39,7 @@
       font-size: 2.5rem;
       margin-bottom: 2rem;
       text-shadow: 0 0 5px #00f2ff;
-      width: 100%;  /* 確保標題在整個容器上方 */
+      grid-column: span 3;  /* 標題橫跨多列 */
     }
 
     /* BOSS 區塊 */
@@ -48,11 +48,8 @@
       border: 1px solid #00f2ff;
       border-radius: 12px;
       padding: 1.5rem;
-      margin-right: 1.5rem; /* 右邊距離 */
       box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
       transition: transform 0.2s ease;
-      flex-shrink: 0;  /* 禁止縮小 */
-      min-width: 250px; /* 每個 BOSS 區塊的最小寬度 */
     }
 
     .boss:hover {
