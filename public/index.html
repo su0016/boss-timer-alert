@@ -4,7 +4,105 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BOSS 重生提醒系統</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* 全域設定 */
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background-color: #0f0f0f;
+      color: #00f2ff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    /* 容器 */
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      background: rgba(0, 255, 255, 0.05);
+      border: 1px solid #00f2ff;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    }
+
+    /* 標題 */
+    .container h1 {
+      text-align: center;
+      color: #00f2ff;
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      text-shadow: 0 0 5px #00f2ff;
+    }
+
+    /* BOSS 區塊 */
+    .boss {
+      background-color: rgba(0, 0, 0, 0.6);
+      border: 1px solid #00f2ff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+      transition: transform 0.2s ease;
+    }
+
+    .boss:hover {
+      transform: scale(1.02);
+    }
+
+    /* BOSS 名稱 */
+    .boss h2 {
+      margin-top: 0;
+      font-size: 1.8rem;
+      color: #00ffff;
+    }
+
+    /* 時間輸入欄位 */
+    .boss input[type="time"] {
+      background-color: #111;
+      color: #00f2ff;
+      border: 1px solid #00f2ff;
+      padding: 0.5rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      margin-right: 1rem;
+    }
+
+    /* 儲存按鈕 */
+    .boss button {
+      background: linear-gradient(45deg, #00f2ff, #0088ff);
+      border: none;
+      color: black;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s;
+      box-shadow: 0 0 10px #00f2ff;
+    }
+
+    .boss button:hover {
+      background: linear-gradient(45deg, #0088ff, #00f2ff);
+      transform: scale(1.05);
+    }
+
+    /* 倒數文字 */
+    .countdown {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      color: #ffffff;
+      text-shadow: 0 0 5px #00f2ff;
+    }
+
+    /* 音效提示變色 */
+    .boss.alerted {
+      border-color: #ff00ff;
+      box-shadow: 0 0 20px #ff00ff;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
