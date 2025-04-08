@@ -88,21 +88,58 @@
       color: #000;
     }
 
-    /* 音效按鈕 */
-    #soundBtn {
-      display: block;
-      margin: 20px auto;
-      padding: 8px 16px;
-      background-color: #00ffc8;
-      border: none;
+    /* 模態視窗 */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: #2e3138;
+      padding: 20px;
       border-radius: 8px;
-      color: #000;
+      color: white;
+    }
+
+    .modal input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #444;
+      color: #fff;
+    }
+
+    .modal button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background-color: #00ffc8;
+      color: black;
       font-weight: bold;
       cursor: pointer;
     }
 
-    #soundBtn:hover {
+    .modal button:hover {
       background-color: #ffa500;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: white;
+      cursor: pointer;
+      font-size: 20px;
     }
   </style>
 </head>
@@ -120,12 +157,25 @@
   <audio id="alertSound" src="/sounds/default.mp3" preload="auto"></audio>
   <audio id="voiceSound" preload="auto"></audio>
 
+  <!-- 模態視窗 -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <h3>請輸入新的復活時間</h3>
+      <input type="text" id="modalTimeInput" placeholder="例如：16:59" />
+      <button onclick="saveNewRespawnTime()">確認時間</button>
+    </div>
+  </div>
+
   <script>
     const bossListEl = document.getElementById("bossList");
     const alertSound = document.getElementById("alertSound");
     const voiceSound = document.getElementById("voiceSound");
+    const modal = document.getElementById("modal");
+    const modalTimeInput = document.getElementById("modalTimeInput");
 
     let bossData = [];
+    let currentBossName = '';
 
     // 檢查是否已經登入
     window.onload = function() {
@@ -197,17 +247,13 @@
           alertSound.play();
         }
 
-        // 儲存時間的key, 並只在首次渲染時設置為輸入框的 value
-        const savedTime = localStorage.getItem(`newRespawnTime_${boss.name}`) || "";
-
         container.innerHTML = `
           <h3>${boss.name}</h3>
           <div class="warning">${warningText}</div>
           <p>最後擊殺時間: ${lastKilled.toLocaleString()}</p>
           <p>倒數時間: ${countdownText}</p>
           <div class="button-group">
-            <input type="text" id="newRespawnTime_${boss.name}" placeholder="輸入新時間 (例如: 16:59)" value="${savedTime}" />
-            <button onclick="confirmNewRespawnTime('${boss.name}')">確認時間</button>
+            <button onclick="openModal('${boss.name}')">輸入新時間</button>
             <button onclick="resetBoss('${boss.name}')">重置時間</button>
           </div>
         `;
@@ -220,20 +266,30 @@
       voiceSound.play();
     }
 
-    async function confirmNewRespawnTime(bossName) {
-      const newRespawnTime = document.getElementById(`newRespawnTime_${bossName}`).value;
-      if (newRespawnTime) {
-        // 存儲輸入時間到localStorage
-        localStorage.setItem(`newRespawnTime_${bossName}`, newRespawnTime);
+    // 開啟模態視窗
+    function openModal(bossName) {
+      currentBossName = bossName;
+      modal.style.display = "flex";
+    }
 
-        await fetch(`/api/boss/${bossName}/adjustRespawnTime`, {
+    // 關閉模態視窗
+    function closeModal() {
+      modal.style.display = "none";
+    }
+
+    // 保存新時間並更新 BOSS
+    async function saveNewRespawnTime() {
+      const newRespawnTime = modalTimeInput.value;
+      if (newRespawnTime) {
+        await fetch(`/api/boss/${currentBossName}/adjustRespawnTime`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ newRespawnTime }),
         });
-        alert(`${bossName} 的復活時間已更新為 ${newRespawnTime}`);
+        alert(`${currentBossName} 的復活時間已更新為 ${newRespawnTime}`);
+        closeModal();
       } else {
         alert("請輸入有效的時間");
       }
