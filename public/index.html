@@ -1,342 +1,57 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <title>BOSS 【好戰】提示系統</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      padding: 20px;
-      background: #0d1117;
-      color: #e6edf3;
-    }
+  <meta charset="UTF-8">
+  <title>BOSS 計時器</title>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      fetch('/api/bosses')
+        .then(response => response.json())
+        .then(bosses => {
+          const container = document.getElementById('bosses-container');
+          bosses.forEach(boss => {
+            const bossDiv = document.createElement('div');
+            bossDiv.className = 'boss';
+            bossDiv.innerHTML = `
+              <h3>${boss.name}</h3>
+              <p id="respawn-time-${boss.name}">下一次重生時間：${boss.respawnTime ? new Date(boss.respawnTime).toLocaleString() : '未知'}</p>
+              <button onclick="setRespawnTime('${boss.name}')">設定重生時間</button>
+            `;
+            container.appendChild(bossDiv);
+          });
+        })
+        .catch(error => console.error('Error fetching bosses:', error));
+    });
 
-    h1 {
-      text-align: center;
-      color: #00ffc8;
-      margin-bottom: 5px;
+    function setRespawnTime(bossName) {
+      const time = prompt(`請輸入 ${bossName} 的下一次重生時間（格式：HH:mm）:`);
+      if (time && /^\d{2}:\d{2}$/.test(time)) {
+        fetch(`/api/boss/${encodeURIComponent(bossName)}/setRespawnTime`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ time }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(`錯誤：${data.error}`);
+          } else {
+            alert(data.message);
+            document.getElementById(`respawn-time-${bossName}`).innerText = `下一次重生時間：${new Date(data.respawnTime).toLocaleString()}`;
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('設定重生時間時出錯');
+        });
+      } else {
+        alert('請輸入有效的時間格式（HH:mm）');
+      }
     }
-
-    #refreshBtn {
-      display: block;
-      margin: 20px auto;
-      padding: 10px 20px;
-      background-color: #ffa500;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      color: #1e1e1e;
-      font-weight: bold;
-    }
-
-    #refreshBtn:hover {
-      background-color: #ff6347;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 20px;
-    }
-
-    .boss {
-      border: 1px solid #2f2f2f;
-      padding: 20px;
-      border-radius: 12px;
-      background: #161b22;
-      transition: transform 0.3s ease, background 0.3s ease;
-    }
-
-    .boss:hover {
-      transform: scale(1.02);
-      background: #1e232a;
-    }
-
-    .boss h3 {
-      margin-top: 0;
-      color: #58a6ff;
-    }
-
-    .warning {
-      color: #ff4d4d;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .button-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .button-group button {
-      flex: 1 1 calc(33.333% - 10px);
-      padding: 8px;
-      border: none;
-      border-radius: 6px;
-      background-color: #00ffc8;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-
-    .button-group button:hover {
-      background-color: #ffa500;
-      color: #000;
-    }
-
-    /* 音效按鈕 */
-    #soundBtn {
-      display: block;
-      margin: 20px auto;
-      padding: 8px 16px;
-      background-color: #00ffc8;
-      border: none;
-      border-radius: 8px;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    #soundBtn:hover {
-      background-color: #ffa500;
-    }
-
-    /* 登入表單樣式 */
-    #loginForm {
-      max-width: 300px;
-      margin: 0 auto;
-      background-color: #fff;
-      background-image: url('https://raw.githubusercontent.com/su0016/boss-timer-alert/refs/heads/main/public/sounds/631.png'); /* 設置背景圖片 */
-      background-size: cover;  /* 背景圖片會覆蓋整個表單 */
-      background-position: center 20%;
-      //background-position: center;  /* 圖片置中 */
-      background-repeat: no-repeat;  /* 防止圖片重複 */
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      display: none;
-      box-sizing: border-box;  /* 確保邊框和內邊距不會超過最大寬度 */
-    }
-    input {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;  /* 確保邊框和內邊距不會超過最大寬度 */
-  background-color: transparent;  /* 設定背景為透明 */
-  color: #fff;  /* 設定文字顏色為白色，讓文字清晰顯示在背景圖片上 */
-}
-    button {
-      width: 100%;
-      padding: 10px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      box-sizing: border-box;  /* 確保邊框和內邊距不會超過最大寬度 */
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-    .error-message {
-      color: red;
-      display: none;
-    }
-  </style>
+  </script>
 </head>
 <body>
-  <!-- 登入表單 -->
-  <div id="loginForm">
-    <h2>登入</h2>
-    <input type="text" id="username" placeholder="帳號" required />
-    <input type="password" id="password" placeholder="密碼" required />
-    <button onclick="loginUser()">登入</button>
-    <p id="errorMessage" class="error-message">帳號或密碼錯誤</p>
-  </div>
-
-  <!-- 主內容頁 -->
-  <h1>🎯 BOSS 【好戰天堂】 音效提示系統</h1>
-  <h1>     你媽豬肉 專用版本 </h1>
-  <h1>        5塊錢製作 客制化請洽 QQ 3760199864</h1>
-
-  <button id="refreshBtn" onclick="refreshPage()" style="display: none;">刷新介面</button>
-
-  <div id="bossList" class="grid">載入中...</div>
-
-  <button id="soundBtn" onclick="enableSound()" style="display: none;">啟用音效</button>
-
-  <audio id="alertSound" src="/sounds/default.mp3" preload="auto"></audio>
-  <audio id="voiceSound" preload="auto"></audio>
-
-  <script>
-    const bossListEl = document.getElementById("bossList");
-    const alertSound = document.getElementById("alertSound");
-    const voiceSound = document.getElementById("voiceSound");
-    const loginForm = document.getElementById("loginForm");
-    const errorMessage = document.getElementById("errorMessage");
-
-    let bossData = [];
-
-    // 檢查是否已經登入
-    window.onload = function() {
-  const isLoggedIn = localStorage.getItem('isLoggedIn');
-  if (isLoggedIn === 'true') {
-    document.getElementById("refreshBtn").style.display = "block";
-    document.getElementById("soundBtn").style.display = "block";
-    fetchBosses();  // 這裡是登入後才會載入BOSS資料
-  } else {
-    loginForm.style.display = "block";  // 顯示登入表單
-  }
-};
-
-// 登入邏輯
-function loginUser() {
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
-
-  // 登入帳號密碼設定為 0000 / 5678
-  if (username === '0000' && password === '5678') {
-    localStorage.setItem('isLoggedIn', 'true');
-    loginForm.style.display = "none";  // 隱藏登入表單
-    document.getElementById("refreshBtn").style.display = "block";  // 顯示刷新按鈕
-    document.getElementById("soundBtn").style.display = "block";  // 顯示音效按鈕
-    fetchBosses();  // 登入後載入BOSS資料
-  } else {
-    errorMessage.style.display = "block";  // 顯示錯誤訊息
-  }
-}
-
-
-    async function fetchBosses() {
-      const res = await fetch("/api/bosses");
-      bossData = await res.json();
-      updateBossList();
-
-      setInterval(() => {
-    updateBossList();
-    }, 1000);
-    }
-
-    function updateBossList() {
-      bossListEl.innerHTML = "";
-      const now = new Date();
-
-  // 先排序 bossData，將倒數時間較短的BOSS排在前面
-    bossData.sort((a, b) => {
-    const timeLeftA = new Date(a.respawnTime) - now;
-    const timeLeftB = new Date(b.respawnTime) - now;
-    return timeLeftA - timeLeftB; // 倒數時間較短的排前面
-    });
-      
-      bossData.forEach(boss => {
-        const container = document.createElement("div");
-        container.className = "boss";
-
-        const lastKilled = new Date(boss.lastKilled);
-        const respawnTime = new Date(boss.respawnTime);
-        const timeLeftMs = respawnTime - now;
-
-        let countdownText = "";
-        let warningText = "";
-
-        if (timeLeftMs > 0) {
-          const hours = Math.floor(timeLeftMs / 3600000);
-          const minutes = Math.floor((timeLeftMs % 3600000) / 60000);
-          const seconds = Math.floor((timeLeftMs % 60000) / 1000);
-          countdownText = `⏳ 倒數：${hours} 小時 ${minutes} 分 ${seconds} 秒`;
-
-          if (timeLeftMs < 60000 && !boss.alerted) {
-            alertSound.play();
-
-            const audioName = getAudioFilename(boss.name);
-            if (audioName) {
-              voiceSound.src = `/sounds/${audioName}`;
-              voiceSound.play();
-            }
-
-            boss.alerted = true;
-            warningText = `<div class="warning">⚠️ ${boss.name} 即將在 1 分鐘內重生！</div>`; 
-          }
-        } else {
-          countdownText = "✅ 已重生";
-          boss.alerted = false;
-        }
-
-        container.innerHTML = `
-          <h3>${boss.name}</h3>
-          ${warningText}
-          <div>🕒 上次擊殺時間：${lastKilled.toLocaleString()}</div>
-          <div>🔄 下一次重生時間：${respawnTime.toLocaleString()}</div>
-          <div>${countdownText}</div>
-          <div class="button-group">
-            <button onclick="resetTime('${boss.name}')">重設時間</button>
-            <button onclick="adjustRespawnTime('${boss.name}', 1)">+1 分鐘</button>
-            <button onclick="adjustRespawnTime('${boss.name}', -1)">-1 分鐘</button>
-          </div>
-        `;
-
-        bossListEl.appendChild(container);
-      });
-    }
-
-    function getAudioFilename(name) {
-      const mapping = {
-        "飛龍-1": "Fly1.mp3",
-        "飛龍-2": "Fly2.mp3",
-        "飛龍-3": "Fly3.mp3",
-        "飛龍-4": "Fly4.mp3",
-        "伊佛利特-1": "EF-1.mp3",
-        "伊佛利特-2": "EF-2.mp3",
-        "伊佛利特-3": "EF-3.mp3",
-        "伊佛利特-4": "EF-4.mp3",
-        "巨大鱷魚王": "BIG.mp3",
-        "黑長老": "BLACK.mp3",
-        "四色": "4.mp3",
-        "魔法師": "MAGIC.mp3",
-        "巴風特": "BIGBIG.mp3",
-        "巴列斯": "BIG1BIG1.mp3",
-        "變形怪首領": "01.mp3",
-        "古代巨人": "02.mp3",
-        "不死鳥": "03.mp3",
-        "賽尼斯": "04.mp3",
-        "反王肯恩": "05.mp3",
-        "巨大牛人": "06.mp3",
-        "冰之女皇": "07.mp3",
-        "巨蟻女皇": "08.mp3"
-      };
-      return mapping[name] || null;
-    }
-
-        async function adjustRespawnTime(bossName, minutes) {
-      await fetch(`/api/boss/${bossName}/adjustRespawnTime`, {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ minutes })
-      });
-      await fetchBosses();
-    }
-
-    async function resetTime(bossName) {
-      await fetch(`/api/boss/${bossName}/kill`, { method: "POST" });
-      await fetchBosses();
-    }
-
-    function enableSound() {
-      alertSound.play();
-      voiceSound.play();
-    }
-
-    function refreshPage() {
-      location.reload();
-    }
-
-  
-  </script>
+  <h1>BOSS 計時器</h1>
+  <div id="bosses-container"></div>
 </body>
 </html>
