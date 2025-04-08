@@ -20,17 +20,17 @@
 
     /* 容器 */
     .container {
-      width: 90%;
+      width: 100%;
       max-width: 1200px;
       background: rgba(0, 255, 255, 0.05);
       border: 1px solid #00f2ff;
       border-radius: 16px;
       padding: 2rem;
       box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-      display: flex;
-      flex-wrap: wrap;  /* 讓 BOSS 區塊換行 */
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));  /* 網格設計 */
       gap: 2rem;  /* BOSS 區塊之間的間距 */
-      justify-content: center;  /* 居中排列 */
+      justify-items: center;  /* 每個項目在其格子中居中顯示 */
     }
 
     /* 標題 */
@@ -49,12 +49,13 @@
       border: 1px solid #00f2ff;
       border-radius: 12px;
       padding: 1.5rem;
-      width: 300px;  /* 每個 BOSS 區塊固定寬度 */
+      width: 100%;
       box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
       transition: transform 0.2s ease;
       display: flex;
-      flex-direction: column;  /* BOSS 區塊內部元素垂直排列 */
-      align-items: flex-start;  /* 將內容靠左排列 */
+      flex-direction: column;  /* 內容垂直排列 */
+      align-items: center;
+      justify-content: space-between;
     }
 
     .boss:hover {
