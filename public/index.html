@@ -27,6 +27,9 @@
       border-radius: 16px;
       padding: 2rem;
       box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+      display: flex;
+      flex-wrap: wrap;  /* 允許換行 */
+      justify-content: space-around;  /* 水平居中並間隔 */
     }
 
     /* 標題 */
@@ -36,6 +39,7 @@
       font-size: 2.5rem;
       margin-bottom: 2rem;
       text-shadow: 0 0 5px #00f2ff;
+      width: 100%;  /* 確保標題在整個容器上方 */
     }
 
     /* BOSS 區塊 */
@@ -45,8 +49,11 @@
       border-radius: 12px;
       padding: 1.5rem;
       margin-bottom: 1.5rem;
+      margin-right: 1.5rem; /* 右邊距離 */
       box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
       transition: transform 0.2s ease;
+      flex: 0 0 calc(33% - 1.5rem); /* 每個區塊佔三分之一的寬度，減去邊距 */
+      margin-left: 1.5rem;
     }
 
     .boss:hover {
