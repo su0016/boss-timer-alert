@@ -1,57 +1,77 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <title>BOSS 計時器</title>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      fetch('/api/bosses')
-        .then(response => response.json())
-        .then(bosses => {
-          const container = document.getElementById('bosses-container');
-          bosses.forEach(boss => {
-            const bossDiv = document.createElement('div');
-            bossDiv.className = 'boss';
-            bossDiv.innerHTML = `
-              <h3>${boss.name}</h3>
-              <p id="respawn-time-${boss.name}">下一次重生時間：${boss.respawnTime ? new Date(boss.respawnTime).toLocaleString() : '未知'}</p>
-              <button onclick="setRespawnTime('${boss.name}')">設定重生時間</button>
-            `;
-            container.appendChild(bossDiv);
-          });
-        })
-        .catch(error => console.error('Error fetching bosses:', error));
-    });
-
-    function setRespawnTime(bossName) {
-      const time = prompt(`請輸入 ${bossName} 的下一次重生時間（格式：HH:mm）:`);
-      if (time && /^\d{2}:\d{2}$/.test(time)) {
-        fetch(`/api/boss/${encodeURIComponent(bossName)}/setRespawnTime`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ time }),
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.error) {
-            alert(`錯誤：${data.error}`);
-          } else {
-            alert(data.message);
-            document.getElementById(`respawn-time-${bossName}`).innerText = `下一次重生時間：${new Date(data.respawnTime).toLocaleString()}`;
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          alert('設定重生時間時出錯');
-        });
-      } else {
-        alert('請輸入有效的時間格式（HH:mm）');
-      }
-    }
-  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BOSS 重生提醒系統</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>BOSS 計時器</h1>
-  <div id="bosses-container"></div>
+  <div class="container">
+    <h1>BOSS 重生提醒系統</h1>
+    <div id="bossContainer"></div>
+  </div>
+  <audio id="alertSound" src="https://www.myinstants.com/media/sounds/mlg-airhorn.mp3"></audio>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const response = await fetch('/api/bosses');
+      const bosses = await response.json();
+      const container = document.getElementById('bossContainer');
+
+      bosses.forEach(boss => {
+        const div = document.createElement('div');
+        div.classList.add('boss');
+
+        const name = document.createElement('h2');
+        name.textContent = boss.name;
+
+        const timeInput = document.createElement('input');
+        timeInput.type = 'time';
+        timeInput.value = boss.respawnTime || '';
+
+        const saveBtn = document.createElement('button');
+        saveBtn.textContent = '儲存';
+        saveBtn.onclick = async () => {
+          await fetch(`/api/boss/${encodeURIComponent(boss.name)}/adjustRespawnTime`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ respawnTime: timeInput.value })
+          });
+          alert('已儲存');
+        };
+
+        const countdown = document.createElement('p');
+        countdown.className = 'countdown';
+
+        div.appendChild(name);
+        div.appendChild(timeInput);
+        div.appendChild(saveBtn);
+        div.appendChild(countdown);
+
+        container.appendChild(div);
+
+        setInterval(() => {
+          if (timeInput.value) {
+            const now = new Date();
+            const [h, m] = timeInput.value.split(':').map(Number);
+            const target = new Date();
+            target.setHours(h, m, 0, 0);
+            if (target < now) target.setDate(target.getDate() + 1);
+
+            const diff = target - now;
+            const minutes = Math.floor(diff / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            countdown.textContent = `重生倒數: ${minutes}分 ${seconds}秒`;
+
+            if (diff <= 60000 && !div.classList.contains('alerted')) {
+              document.getElementById('alertSound').play();
+              fetch(`/api/notify/${encodeURIComponent(boss.name)}`);
+              div.classList.add('alerted');
+            }
+          }
+        }, 1000);
+      });
+    });
+  </script>
 </body>
 </html>
