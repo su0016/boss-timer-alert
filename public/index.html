@@ -64,73 +64,55 @@
       margin-bottom: 10px;
     }
 
-    /* 登入表單樣式 */
-    #loginForm {
-      max-width: 300px;
-      margin: 0 auto;
-      background-color: #fff;
-      background-image: url('https://raw.githubusercontent.com/su0016/boss-timer-alert/refs/heads/main/public/sounds/631.png'); /* 設置背景圖片 */
-      background-size: cover;  /* 背景圖片會覆蓋整個表單 */
-      background-position: center 20%;
-      //background-position: center;  /* 圖片置中 */
-      background-repeat: no-repeat;  /* 防止圖片重複 */
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      display: none;
-      box-sizing: border-box;  /* 確保邊框和內邊距不會超過最大寬度 */
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
     }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;  /* 確保邊框和內邊距不會超過最大寬度 */
-      background-color: transparent;  /* 設定背景為透明 */
-      color: #fff;  /* 設定文字顏色為白色，讓文字清晰顯示在背景圖片上 */
-    }
-    button {
-      width: 100%;
-      padding: 10px;
-      background-color: #4CAF50;
-      color: white;
+
+    .button-group button {
+      flex: 1 1 calc(33.333% - 10px);
+      padding: 8px;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
+      background-color: #00ffc8;
+      color: #000;
+      font-weight: bold;
       cursor: pointer;
-      box-sizing: border-box;  /* 確保邊框和內邊距不會超過最大寬度 */
+      transition: background-color 0.2s ease;
     }
-    button:hover {
-      background-color: #45a049;
+
+    .button-group button:hover {
+      background-color: #ffa500;
+      color: #000;
     }
-    .error-message {
-      color: red;
-      display: none;
+
+    /* 音效按鈕 */
+    #soundBtn {
+      display: block;
+      margin: 20px auto;
+      padding: 8px 16px;
+      background-color: #00ffc8;
+      border: none;
+      border-radius: 8px;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #soundBtn:hover {
+      background-color: #ffa500;
     }
   </style>
 </head>
 <body>
-  <!-- 登入表單 -->
-  <div id="loginForm">
-    <h2>登入</h2>
-    <input type="text" id="username" placeholder="帳號" required />
-    <input type="password" id="password" placeholder="密碼" required />
-    <button onclick="loginUser()">登入</button>
-    <p id="errorMessage" class="error-message">帳號或密碼錯誤</p>
-  </div>
-
   <!-- 主內容頁 -->
   <h1>🎯 BOSS 【好戰天堂】 音效提示系統</h1>
   <h1>     你媽豬肉 專用版本 </h1>
   <h1>        5塊錢製作 客制化請洽 QQ 3760199864</h1>
 
   <button id="refreshBtn" onclick="refreshPage()" style="display: none;">刷新介面</button>
-
-  <!-- 用戶輸入時間 -->
-  <div>
-    <input type="text" id="timeInput" placeholder="請輸入時間 (例如 16:59)" />
-    <button onclick="submitTime()">確認</button>
-  </div>
 
   <div id="bossList" class="grid">載入中...</div>
 
@@ -143,8 +125,6 @@
     const bossListEl = document.getElementById("bossList");
     const alertSound = document.getElementById("alertSound");
     const voiceSound = document.getElementById("voiceSound");
-    const loginForm = document.getElementById("loginForm");
-    const errorMessage = document.getElementById("errorMessage");
 
     let bossData = [];
 
@@ -155,8 +135,6 @@
         document.getElementById("refreshBtn").style.display = "block";
         document.getElementById("soundBtn").style.display = "block";
         fetchBosses();  // 這裡是登入後才會載入BOSS資料
-      } else {
-        loginForm.style.display = "block";  // 顯示登入表單
       }
     };
 
@@ -174,23 +152,6 @@
         fetchBosses();  // 登入後載入BOSS資料
       } else {
         errorMessage.style.display = "block";  // 顯示錯誤訊息
-      }
-    }
-
-    // 提交時間到後端
-    async function submitTime() {
-      const time = document.getElementById("timeInput").value;
-      if (time) {
-        await fetch("/api/boss/setRespawnTime", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ time }),
-        });
-        alert(`時間已更新為 ${time}`);
-      } else {
-        alert("請輸入有效的時間！");
       }
     }
 
@@ -214,7 +175,7 @@
         const timeLeftB = new Date(b.respawnTime) - now;
         return timeLeftA - timeLeftB; // 倒數時間較短的排前面
       });
-
+        
       bossData.forEach(boss => {
         const container = document.createElement("div");
         container.className = "boss";
@@ -243,7 +204,8 @@
           <p>最後擊殺時間: ${lastKilled.toLocaleString()}</p>
           <p>倒數時間: ${countdownText}</p>
           <div class="button-group">
-            <button onclick="adjustRespawnTime('${boss.name}')">調整倒數時間</button>
+            <input type="text" id="newRespawnTime_${boss.name}" placeholder="輸入新時間 (例如: 16:59)" />
+            <button onclick="confirmNewRespawnTime('${boss.name}')">確認時間</button>
             <button onclick="resetBoss('${boss.name}')">重置時間</button>
           </div>
         `;
@@ -256,8 +218,8 @@
       voiceSound.play();
     }
 
-    async function adjustRespawnTime(bossName) {
-      const newRespawnTime = prompt(`設定 ${bossName} 下一次復活時間:`, "16:59");
+    async function confirmNewRespawnTime(bossName) {
+      const newRespawnTime = document.getElementById(`newRespawnTime_${bossName}`).value;
       if (newRespawnTime) {
         await fetch(`/api/boss/${bossName}/adjustRespawnTime`, {
           method: "POST",
@@ -266,7 +228,9 @@
           },
           body: JSON.stringify({ newRespawnTime }),
         });
-        alert(`${bossName} 的復活時間已更新`);
+        alert(`${bossName} 的復活時間已更新為 ${newRespawnTime}`);
+      } else {
+        alert("請輸入有效的時間");
       }
     }
 
