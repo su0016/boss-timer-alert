@@ -28,8 +28,8 @@
       padding: 2rem;
       box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
       display: flex;
-      flex-wrap: wrap;  /* 允許換行 */
-      justify-content: space-around;  /* 水平居中並間隔 */
+      flex-wrap: nowrap;  /* 禁止換行，強制讓所有內容橫向排列 */
+      overflow-x: auto;  /* 滑動條顯示，讓內容可以左右滑動 */
     }
 
     /* 標題 */
@@ -48,12 +48,11 @@
       border: 1px solid #00f2ff;
       border-radius: 12px;
       padding: 1.5rem;
-      margin-bottom: 1.5rem;
       margin-right: 1.5rem; /* 右邊距離 */
       box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
       transition: transform 0.2s ease;
-      flex: 0 0 calc(33% - 1.5rem); /* 每個區塊佔三分之一的寬度，減去邊距 */
-      margin-left: 1.5rem;
+      flex-shrink: 0;  /* 禁止縮小 */
+      min-width: 250px; /* 每個 BOSS 區塊的最小寬度 */
     }
 
     .boss:hover {
