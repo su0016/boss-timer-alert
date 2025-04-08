@@ -64,47 +64,6 @@
       margin-bottom: 10px;
     }
 
-    .button-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .button-group button {
-      flex: 1 1 calc(33.333% - 10px);
-      padding: 8px;
-      border: none;
-      border-radius: 6px;
-      background-color: #00ffc8;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-
-    .button-group button:hover {
-      background-color: #ffa500;
-      color: #000;
-    }
-
-    /* 音效按鈕 */
-    #soundBtn {
-      display: block;
-      margin: 20px auto;
-      padding: 8px 16px;
-      background-color: #00ffc8;
-      border: none;
-      border-radius: 8px;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    #soundBtn:hover {
-      background-color: #ffa500;
-    }
-
     /* 登入表單樣式 */
     #loginForm {
       max-width: 300px;
@@ -139,7 +98,7 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      box-sizing: border-box;  /* 確保邊框和內邑不會超過最大寬度 */
+      box-sizing: border-box;  /* 確保邊框和內邊距不會超過最大寬度 */
     }
     button:hover {
       background-color: #45a049;
@@ -166,6 +125,12 @@
   <h1>        5塊錢製作 客制化請洽 QQ 3760199864</h1>
 
   <button id="refreshBtn" onclick="refreshPage()" style="display: none;">刷新介面</button>
+
+  <!-- 用戶輸入時間 -->
+  <div>
+    <input type="text" id="timeInput" placeholder="請輸入時間 (例如 16:59)" />
+    <button onclick="submitTime()">確認</button>
+  </div>
 
   <div id="bossList" class="grid">載入中...</div>
 
@@ -212,6 +177,23 @@
       }
     }
 
+    // 提交時間到後端
+    async function submitTime() {
+      const time = document.getElementById("timeInput").value;
+      if (time) {
+        await fetch("/api/boss/setRespawnTime", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ time }),
+        });
+        alert(`時間已更新為 ${time}`);
+      } else {
+        alert("請輸入有效的時間！");
+      }
+    }
+
     async function fetchBosses() {
       const res = await fetch("/api/bosses");
       bossData = await res.json();
@@ -232,7 +214,7 @@
         const timeLeftB = new Date(b.respawnTime) - now;
         return timeLeftA - timeLeftB; // 倒數時間較短的排前面
       });
-        
+
       bossData.forEach(boss => {
         const container = document.createElement("div");
         container.className = "boss";
@@ -274,30 +256,29 @@
       voiceSound.play();
     }
 
-    // 更新倒數時間的方法
     async function adjustRespawnTime(bossName) {
       const newRespawnTime = prompt(`設定 ${bossName} 下一次復活時間:`, "16:59");
       if (newRespawnTime) {
         await fetch(`/api/boss/${bossName}/adjustRespawnTime`, {
-          method: 'POST',
-          body: JSON.stringify({ respawnTime: newRespawnTime }),
-          headers: { 'Content-Type': 'application/json' }
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ newRespawnTime }),
         });
-        fetchBosses();  // 更新BOSS列表
+        alert(`${bossName} 的復活時間已更新`);
       }
     }
 
-    // 重置倒數時間
     async function resetBoss(bossName) {
       await fetch(`/api/boss/${bossName}/reset`, {
-        method: 'POST'
+        method: "POST",
       });
-      fetchBosses();  // 更新BOSS列表
+      alert(`${bossName} 的復活時間已重置`);
     }
 
-    // 刷新頁面
     function refreshPage() {
-      location.reload();
+      window.location.reload();
     }
   </script>
 </body>
