@@ -107,7 +107,6 @@
   </style>
 </head>
 <body>
-  <!-- 主內容頁 -->
   <h1>🎯 BOSS 【好戰天堂】 音效提示系統</h1>
   <h1>     你媽豬肉 專用版本 </h1>
   <h1>        5塊錢製作 客制化請洽 QQ 3760199864</h1>
@@ -204,7 +203,7 @@
           <p>最後擊殺時間: ${lastKilled.toLocaleString()}</p>
           <p>倒數時間: ${countdownText}</p>
           <div class="button-group">
-            <input type="text" id="newRespawnTime_${boss.name}" placeholder="輸入新時間 (例如: 16:59)" />
+            <input type="text" id="newRespawnTime_${boss.name}" placeholder="輸入新時間 (例如: 16:59)" value="${localStorage.getItem(`newRespawnTime_${boss.name}`) || ''}" />
             <button onclick="confirmNewRespawnTime('${boss.name}')">確認時間</button>
             <button onclick="resetBoss('${boss.name}')">重置時間</button>
           </div>
@@ -221,6 +220,9 @@
     async function confirmNewRespawnTime(bossName) {
       const newRespawnTime = document.getElementById(`newRespawnTime_${bossName}`).value;
       if (newRespawnTime) {
+        // 存儲輸入時間到localStorage
+        localStorage.setItem(`newRespawnTime_${bossName}`, newRespawnTime);
+
         await fetch(`/api/boss/${bossName}/adjustRespawnTime`, {
           method: "POST",
           headers: {
