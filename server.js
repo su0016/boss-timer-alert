@@ -74,22 +74,31 @@ app.post('/api/boss/:name/setRespawnTime', async (req, res) => {
   const bossName = req.params.name;
   const { time } = req.body; // 預期格式：HH:mm
 
+  // 確保時間格式正確
   if (!/^\d{2}:\d{2}$/.test(time)) {
     return res.status(400).json({ error: '時間格式錯誤，請使用 HH:mm' });
   }
 
   const today = new Date();
   const [hour, minute] = time.split(':');
+
+  // 創建新的時間物件，保留今天的日期並更新時間
   const respawnDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), parseInt(hour), parseInt(minute));
+
+  // 把新的時間轉換成 ISO 8601 格式
+  const isoRespawnTime = respawnDate.toISOString();
 
   let data = await getBossData();
   const boss = data.find(b => b.name === bossName);
   if (!boss) return res.status(404).json({ error: `找不到 ${bossName}` });
 
-  boss.respawnTime = respawnDate.toISOString();
+  // 更新 BOSS 的重生時間
+  boss.respawnTime = isoRespawnTime;
 
   try {
     const rowIndex = data.findIndex(b => b.name === bossName) + 2;
+
+    // 更新 Google Sheets 中的重生時間
     await sheets.spreadsheets.values.update({
       auth,
       spreadsheetId: SPREADSHEET_ID,
@@ -100,6 +109,7 @@ app.post('/api/boss/:name/setRespawnTime', async (req, res) => {
       },
     });
 
+    // 送出 Discord 通知
     await sendDiscordNotification(bossName, `設定新的重生時間為 ${time}`);
 
     res.json({ message: `BOSS ${bossName} 的重生時間已設定為 ${time}` });
