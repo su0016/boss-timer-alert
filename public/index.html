@@ -139,7 +139,7 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      box-sizing: border-box;  /* 確保邊框和內邊距不會超過最大寬度 */
+      box-sizing: border-box;  /* 確保邊框和內邑不會超過最大寬度 */
     }
     button:hover {
       background-color: #45a049;
@@ -274,29 +274,30 @@
       voiceSound.play();
     }
 
+    // 更新倒數時間的方法
     async function adjustRespawnTime(bossName) {
       const newRespawnTime = prompt(`設定 ${bossName} 下一次復活時間:`, "16:59");
       if (newRespawnTime) {
         await fetch(`/api/boss/${bossName}/adjustRespawnTime`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ newRespawnTime }),
+          method: 'POST',
+          body: JSON.stringify({ respawnTime: newRespawnTime }),
+          headers: { 'Content-Type': 'application/json' }
         });
-        alert(`${bossName} 的復活時間已更新`);
+        fetchBosses();  // 更新BOSS列表
       }
     }
 
+    // 重置倒數時間
     async function resetBoss(bossName) {
       await fetch(`/api/boss/${bossName}/reset`, {
-        method: "POST",
+        method: 'POST'
       });
-      alert(`${bossName} 的復活時間已重置`);
+      fetchBosses();  // 更新BOSS列表
     }
 
+    // 刷新頁面
     function refreshPage() {
-      window.location.reload();
+      location.reload();
     }
   </script>
 </body>
