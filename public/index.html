@@ -174,7 +174,7 @@
         const timeLeftB = new Date(b.respawnTime) - now;
         return timeLeftA - timeLeftB; // 倒數時間較短的排前面
       });
-        
+
       bossData.forEach(boss => {
         const container = document.createElement("div");
         container.className = "boss";
@@ -197,13 +197,16 @@
           alertSound.play();
         }
 
+        // 儲存時間的key, 並只在首次渲染時設置為輸入框的 value
+        const savedTime = localStorage.getItem(`newRespawnTime_${boss.name}`) || "";
+
         container.innerHTML = `
           <h3>${boss.name}</h3>
           <div class="warning">${warningText}</div>
           <p>最後擊殺時間: ${lastKilled.toLocaleString()}</p>
           <p>倒數時間: ${countdownText}</p>
           <div class="button-group">
-            <input type="text" id="newRespawnTime_${boss.name}" placeholder="輸入新時間 (例如: 16:59)" value="${localStorage.getItem(`newRespawnTime_${boss.name}`) || ''}" />
+            <input type="text" id="newRespawnTime_${boss.name}" placeholder="輸入新時間 (例如: 16:59)" value="${savedTime}" />
             <button onclick="confirmNewRespawnTime('${boss.name}')">確認時間</button>
             <button onclick="resetBoss('${boss.name}')">重置時間</button>
           </div>
