@@ -4,128 +4,114 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BOSS 重生提醒系統</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
   <style>
-    /* 全域設定 */
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background-color: #0f0f0f;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a2e);
       color: #00f2ff;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
       padding: 2rem;
     }
 
-    /* 容器 */
     .container {
       width: 100%;
-      max-width: 1200px;
-      background: rgba(0, 255, 255, 0.05);
-      border: 1px solid #00f2ff;
-      border-radius: 16px;
+      max-width: 1400px;
       padding: 2rem;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-      display: grid;
-      grid-template-columns: repeat(4, 1fr); /* 每行顯示 4 個區塊 */
-      gap: 2rem;  /* BOSS 區塊之間的間距 */
-      justify-items: center;  /* 每個項目在其格子中居中顯示 */
     }
 
-    /* 標題 */
-    .container h1 {
-      width: 100%;
+    h1 {
       text-align: center;
+      font-size: 3rem;
       color: #00f2ff;
-      font-size: 2.5rem;
-      margin-bottom: 2rem;
-      text-shadow: 0 0 5px #00f2ff;
+      margin-bottom: 2.5rem;
+      text-shadow: 0 0 10px #00f2ff;
+      animation: flicker 3s infinite alternate;
     }
 
-    /* BOSS 區塊 */
+    @keyframes flicker {
+      0% { opacity: 1; }
+      50% { opacity: 0.85; }
+      100% { opacity: 1; }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
+
     .boss {
-      background-color: rgba(0, 0, 0, 0.6);
-      border: 1px solid #00f2ff;
-      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #00f2ff;
+      border-radius: 16px;
       padding: 1.5rem;
-      width: 100%;
-      box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
-      transition: transform 0.2s ease;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+      backdrop-filter: blur(4px);
+      transition: transform 0.3s ease, border 0.3s;
       display: flex;
-      flex-direction: column;  /* 內容垂直排列 */
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
     }
 
     .boss:hover {
       transform: scale(1.05);
+      border-color: #00ffcc;
     }
 
-    /* BOSS 名稱 */
     .boss h2 {
-      margin-top: 0;
-      font-size: 1.8rem;
+      margin: 0 0 1rem 0;
+      font-size: 1.5rem;
       color: #00ffff;
+      text-shadow: 0 0 5px #00ffff;
     }
 
-    /* 時間輸入欄位 */
     .boss input[type="time"] {
-      background-color: #111;
-      color: #00f2ff;
+      background: #121212;
       border: 1px solid #00f2ff;
-      padding: 0.5rem;
-      border-radius: 6px;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      color: #00f2ff;
+      width: 100%;
       font-size: 1rem;
-      margin-right: 1rem;
       margin-bottom: 1rem;
-      width: 100%;  /* 讓時間輸入欄位佔滿寬度 */
     }
 
-    /* 儲存按鈕 */
     .boss button {
-      background: linear-gradient(45deg, #00f2ff, #0088ff);
+      background: linear-gradient(45deg, #00f2ff, #00c3ff);
       border: none;
-      color: black;
+      color: #000;
       font-weight: bold;
-      padding: 0.5rem 1rem;
       border-radius: 8px;
+      padding: 0.6rem 1.2rem;
       cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s;
-      box-shadow: 0 0 10px #00f2ff;
-      margin-bottom: 1rem;
+      transition: transform 0.2s ease, background 0.3s ease;
+      box-shadow: 0 0 15px #00f2ff;
+      width: 100%;
     }
 
     .boss button:hover {
-      background: linear-gradient(45deg, #0088ff, #00f2ff);
+      background: linear-gradient(45deg, #00c3ff, #00f2ff);
       transform: scale(1.05);
     }
 
-    /* 倒數文字 */
     .countdown {
       margin-top: 1rem;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       color: #ffffff;
       text-shadow: 0 0 5px #00f2ff;
     }
 
-    /* 音效提示變色 */
     .boss.alerted {
       border-color: #ff00ff;
-      box-shadow: 0 0 20px #ff00ff;
+      box-shadow: 0 0 25px #ff00ff;
     }
 
-    /* 響應式設計：改為 3 個區塊在較小螢幕上 */
-    @media screen and (max-width: 1200px) {
-      .container {
-        grid-template-columns: repeat(3, 1fr);  /* 每行顯示 3 個區塊 */
-      }
-    }
-
-    /* 響應式設計：改為 2 個區塊在手機上 */
-    @media screen and (max-width: 800px) {
-      .container {
-        grid-template-columns: repeat(2, 1fr);  /* 每行顯示 2 個區塊 */
+    @media screen and (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
       }
     }
   </style>
@@ -133,7 +119,7 @@
 <body>
   <div class="container">
     <h1>BOSS 重生提醒系統</h1>
-    <div id="bossContainer"></div>
+    <div class="grid" id="bossContainer"></div>
   </div>
   <audio id="alertSound" src="https://www.myinstants.com/media/sounds/mlg-airhorn.mp3"></audio>
   <script>
