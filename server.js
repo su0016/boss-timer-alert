@@ -177,7 +177,7 @@ bot.on('messageCreate', async message => {
     }
   }
 });
-
+console.log("Webhook URL:", webhookUrl);
 // 啟動 bot
 bot.login(process.env.DISCORD_BOT_TOKEN);
 
