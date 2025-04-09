@@ -104,7 +104,16 @@ app.post('/api/boss/:name/adjustRespawnTime', async (req, res) => {
 
 app.get('/api/notify/:name', (req, res) => {
   const bossName = req.params.name;
-  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  // ===== Discord Webhook 設定 =====
+const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+if (!webhookUrl) {
+  console.error("🔴 Webhook URL is missing.");
+} else {
+  console.log("🟢 Webhook URL loaded successfully.");
+}
+
+// ===== 其他代碼 =====
+console.log("Webhook URL:", webhookUrl);  // 確保 webhookUrl 已經定義
   if (webhookUrl) {
     console.log(`🟢 Sending notification for BOSS: ${bossName}`);
     fetch(webhookUrl, {
