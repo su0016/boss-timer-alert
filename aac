@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "boss-timer-updater",
+  "private_key_id": "37c7a01c19cb1a9f0506bb5b8577031871882974",
+  "private_key": "-----BEGIN PRIVATE KEY-----\\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDVFMb3reGOanKm\nt6IgZJuBItIBV/OrBPVDaUZ+YJr4C3+q1Ywad6X5INCqXv1dqXJfWl1PYA0IyEOf\nuZzy+GB9U2lOEtyc1wp4Y5qMNrqxKkETLZnIDMqoIMjp15zwWkIIE8i/078vdlm7\nYCtz1Hu0KFA/i2WpiORde4bzCJEql9PkSvkyfMZa96o7eD/LP+PaGGw4wbUr5Ovq\nH3TnTWr5HnbDqnDsTv+l+jh1CbYz3JnrcoMyTAFgtSq4N+qeCI6AKD4xFlMW/I5U\nbr4dKx9kBqm6tYlx8V4Y3DtagPSxNOeBnFWbqErE8xlKbicszwuqS0ywFTp1nxhP\nQoxeF58zAgMBAAECggEAGrJOt2tmriQyFyc8vdg9D3HgY+C0G8I0RGzlMyJBaEBw\nj2PP+OTyu4LcAeyCzABV3xKATFiZaXdF2bY0rtBlrm4L7Ic6csAShMDd9SFKRLYp\njxCQitrnbScmZP3poMd+LGrmJPqPoo+ucGZ9Kzb9BLZkT4HUi+glzHyUjNCO94nx\nsMpBoLlYNPW10juyHD8uC8eEVWfpavNVm4EXpHNaCCXoVAyj8YpN3dTK3/5HihSO\nTUBD16b6Of+YXO7E4IJWZp7afpqWE2h0fTvMICF69z/uiOtsTUszLee3K4X5HBgZ\n4LonVJgdh+vzxolpN6WUI76NzEdYX8E6LIISBZjzuQKBgQDq10biRGSvjMPFIPHj\nYS469RFMuRDsoXESEWq5q03IxR/ZnExyuR/oJQI02VMINdbkPn/EFA70aSFMxamH\nlT6AfYpUQS4dgV1/5diRR6uUQLPZid/ubnHLuMeeADareKvGFfx0bEvtRIjTdpJk\naeRNF1I0HziRDHWZVoLkMLPK/wKBgQDoR5m6vP13Ko25hNsXW4f4TjQr2PnOl/XQ\nN7a44Q2uAP1iEsp12rGmuthgviECmOj7rO45Dn/WSD1mZVEw5FX7pdr0xdCOMQ6F\nEqJ6p93KZ+rnnB4+HOx18B/uCHm3/joQlv3g6YpBQOQf5nc4bJehoZLg6z3aezn1\nxFTTXmbvzQKBgQDbEwKUN7s5rPZAIlCkjlbDNzTxPr+UD7LcaRUHqc+BWKsypMUI\nTLyAIm4hgQ8dXKRf/hHQh+m/hYdECCzzR32r/fEaUkfDzJe9pVxXguWEAqwEZsNY\nuP09T94f/hEB+ys7Oe1tak2WRNXjdvxv4fzREc1kxC9P2LCn3/VxDCHdXwKBgCoU\ntqwXCxBovC5M/Gg54+M/P8Jl17Pu4dCsF0VdOF46vazj3JwHV8Ht/b9hEpfm3eai\niLH7h3tpsP35AwGJjG4/uPA5WjQ4fPnsy1TPTqYZt3voU65LDSe8rfwwuuRzgU96\nG1qA1NRHjkydMyIcwke8/uASni0TwAdfX0K/yoRNAoGBAL4wb1OW31FUeFUaiwGK\nYH8r1TXNdxebdJv4WMAH7vLp/z4qhbYqSe27AmUAIYB2i954EYi0T4YCBJQrMqj3\nbat37zUDJX9EqaEHw7Q3EwpmHv8EvyE4FWGDwtlw7ZVKtdbd/CtsXd3NrmyJ664P\n1F/+qOwwUOOiI+XxjBNQgiCq\n-----END PRIVATE KEY-----\n",
+  "client_email": "boss-timer-updater@boss-timer-updater.iam.gserviceaccount.com",
+  "client_id": "114819381387713363813",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/boss-timer-updater%40boss-timer-updater.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
