@@ -105,18 +105,15 @@ app.post('/api/boss/:name/adjustRespawnTime', async (req, res) => {
 app.get('/api/notify/:name', (req, res) => {
   const bossName = req.params.name;
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-  
   if (webhookUrl) {
     console.log(`🟢 Sending notification for BOSS: ${bossName}`);
     fetch(webhookUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' }, // 去掉 Authorization 標頭
       body: JSON.stringify({ content: `⚔️ ${bossName} 即將重生！` }),
-    })
-    .then(() => {
+    }).then(() => {
       console.log(`🟢 Notification sent for BOSS: ${bossName}`);
-    })
-    .catch((err) => {
+    }).catch((err) => {
       console.error("🔴 Error sending notification:", err.message);
     });
   }
