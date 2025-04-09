@@ -13,7 +13,22 @@ app.use(express.static('public'));
 // ===== Google Sheets 設定 =====
 const SHEET_ID = '1FBZ7Div_p4KnphgaY-5UB0cxs8_n9B27Ry29reDN7EU';
 const SHEET_RANGE = 'A2:D';
-const creds = JSON.parse(process.env.GOOGLE_SHEETS_CREDENTIALS);
+
+// 確認 GOOGLE_SHEETS_CREDENTIALS 是否正確
+const creds = JSON.parse(process.env.GOOGLE_SHEETS_CREDENTIALS || '{}');
+if (!creds.client_email || !creds.private_key) {
+  console.error('🔴 Google Sheets credentials are missing or incorrect.');
+} else {
+  console.log('🟢 Google Sheets credentials loaded successfully.');
+}
+
+// 確認 DISCORD_BOT_TOKEN 是否正確
+const discordToken = process.env.DISCORD_BOT_TOKEN;
+if (!discordToken) {
+  console.error('🔴 Discord Bot Token is missing.');
+} else {
+  console.log('🟢 Discord Bot Token is loaded successfully.');
+}
 
 const auth = new google.auth.GoogleAuth({
   credentials: creds,
@@ -21,88 +36,62 @@ const auth = new google.auth.GoogleAuth({
 });
 
 async function getSheet() {
-  try {
-    const client = await auth.getClient();
-    const sheets = google.sheets({ version: 'v4', auth: client });
-    return sheets;
-  } catch (error) {
-    console.error('Google Sheets 認證錯誤：', error);
-    throw error; // 重新拋出錯誤以便後續處理
-  }
+  const client = await auth.getClient();
+  const sheets = google.sheets({ version: 'v4', auth: client });
+  return sheets;
 }
 
 // ===== 網頁 API =====
 app.get('/api/bosses', async (req, res) => {
-  try {
-    console.log('Fetching BOSS data from Google Sheets...');
-    const sheets = await getSheet();
-    const result = await sheets.spreadsheets.values.get({
-      spreadsheetId: SHEET_ID,
-      range: SHEET_RANGE,
-    });
-    const rows = result.data.values || [];
-    const bosses = rows.map(row => ({
-      name: row[0],
-      respawnTime: row[3] || '',
-    }));
-    console.log('Fetched BOSS data:', bosses);
-    res.json(bosses);
-  } catch (err) {
-    console.error('Error fetching data from Google Sheets:', err);
-    res.status(500).send('Internal Server Error');
-  }
+  const sheets = await getSheet();
+  const result = await sheets.spreadsheets.values.get({
+    spreadsheetId: SHEET_ID,
+    range: SHEET_RANGE,
+  });
+  const rows = result.data.values || [];
+  const bosses = rows.map(row => ({
+    name: row[0],
+    respawnTime: row[3] || '',
+  }));
+  res.json(bosses);
 });
 
 app.post('/api/boss/:name/adjustRespawnTime', async (req, res) => {
   const { name } = req.params;
   const { respawnTime } = req.body;
 
-  try {
-    console.log(`Adjusting respawn time for ${name} to ${respawnTime}`);
-    const sheets = await getSheet();
-    const result = await sheets.spreadsheets.values.get({
-      spreadsheetId: SHEET_ID,
-      range: SHEET_RANGE,
-    });
+  const sheets = await getSheet();
+  const result = await sheets.spreadsheets.values.get({
+    spreadsheetId: SHEET_ID,
+    range: SHEET_RANGE,
+  });
 
-    const rows = result.data.values || [];
-    const index = rows.findIndex(row => row[0] === name);
+  const rows = result.data.values || [];
+  const index = rows.findIndex(row => row[0] === name);
 
-    if (index === -1) {
-      console.error(`BOSS ${name} not found in sheet`);
-      return res.status(404).send('BOSS not found');
-    }
+  if (index === -1) return res.status(404).send('BOSS not found');
 
-    const rowNumber = index + 2;
-    await sheets.spreadsheets.values.update({
-      spreadsheetId: SHEET_ID,
-      range: `D${rowNumber}`,
-      valueInputOption: 'RAW',
-      requestBody: {
-        values: [[respawnTime]],
-      },
-    });
-    console.log(`Updated respawn time for ${name}`);
-    res.send('Updated');
-  } catch (err) {
-    console.error('Google Sheets 更新錯誤：', err);
-    res.status(500).send('Unable to update respawn time');
-  }
+  const rowNumber = index + 2;
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: SHEET_ID,
+    range: `D${rowNumber}`,
+    valueInputOption: 'RAW',
+    requestBody: {
+      values: [[respawnTime]],
+    },
+  });
+  res.send('Updated');
 });
 
 app.get('/api/notify/:name', (req, res) => {
   const bossName = req.params.name;
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-
   if (webhookUrl) {
-    console.log(`Sending notification for BOSS ${bossName} via webhook`);
     fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: `⚔️ ${bossName} 即將重生！` }),
-    }).catch(err => console.error('Error sending Discord webhook:', err));
-  } else {
-    console.error('No webhook URL found');
+    });
   }
   res.send('Notified');
 });
@@ -131,7 +120,6 @@ bot.on('messageCreate', async message => {
     const respawnTime = args[2];
 
     try {
-      console.log(`Updating respawn time for BOSS ${bossName} to ${respawnTime}`);
       const sheets = await getSheet();
       const result = await sheets.spreadsheets.values.get({
         spreadsheetId: SHEET_ID,
