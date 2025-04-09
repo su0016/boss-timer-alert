@@ -35,6 +35,7 @@ const auth = new google.auth.GoogleAuth({
   scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
+// 取得 Google Sheets 客戶端
 async function getSheet() {
   const client = await auth.getClient();
   const sheets = google.sheets({ version: 'v4', auth: client });
@@ -43,54 +44,77 @@ async function getSheet() {
 
 // ===== 網頁 API =====
 app.get('/api/bosses', async (req, res) => {
-  const sheets = await getSheet();
-  const result = await sheets.spreadsheets.values.get({
-    spreadsheetId: SHEET_ID,
-    range: SHEET_RANGE,
-  });
-  const rows = result.data.values || [];
-  const bosses = rows.map(row => ({
-    name: row[0],
-    respawnTime: row[3] || '',
-  }));
-  res.json(bosses);
+  try {
+    console.log("🟢 Fetching bosses data from Google Sheets...");
+    const sheets = await getSheet();
+    const result = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: SHEET_RANGE,
+    });
+
+    const rows = result.data.values || [];
+    const bosses = rows.map(row => ({
+      name: row[0],
+      respawnTime: row[3] || '',
+    }));
+    console.log("🟢 Boss data fetched successfully.");
+    res.json(bosses);
+  } catch (err) {
+    console.error("🔴 Error fetching bosses data:", err.message);
+    res.status(500).send('Failed to fetch data from Google Sheets');
+  }
 });
 
 app.post('/api/boss/:name/adjustRespawnTime', async (req, res) => {
   const { name } = req.params;
   const { respawnTime } = req.body;
 
-  const sheets = await getSheet();
-  const result = await sheets.spreadsheets.values.get({
-    spreadsheetId: SHEET_ID,
-    range: SHEET_RANGE,
-  });
+  try {
+    console.log(`🟢 Adjusting respawn time for ${name} to ${respawnTime}...`);
+    const sheets = await getSheet();
+    const result = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: SHEET_RANGE,
+    });
 
-  const rows = result.data.values || [];
-  const index = rows.findIndex(row => row[0] === name);
+    const rows = result.data.values || [];
+    const index = rows.findIndex(row => row[0] === name);
 
-  if (index === -1) return res.status(404).send('BOSS not found');
+    if (index === -1) {
+      console.log(`🔴 BOSS ${name} not found.`);
+      return res.status(404).send('BOSS not found');
+    }
 
-  const rowNumber = index + 2;
-  await sheets.spreadsheets.values.update({
-    spreadsheetId: SHEET_ID,
-    range: `D${rowNumber}`,
-    valueInputOption: 'RAW',
-    requestBody: {
-      values: [[respawnTime]],
-    },
-  });
-  res.send('Updated');
+    const rowNumber = index + 2;
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: SHEET_ID,
+      range: `D${rowNumber}`,
+      valueInputOption: 'RAW',
+      requestBody: {
+        values: [[respawnTime]],
+      },
+    });
+    console.log(`🟢 Respawn time for ${name} updated to ${respawnTime}`);
+    res.send('Updated');
+  } catch (err) {
+    console.error("🔴 Error updating respawn time:", err.message);
+    res.status(500).send('Failed to update respawn time');
+  }
 });
 
 app.get('/api/notify/:name', (req, res) => {
   const bossName = req.params.name;
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
   if (webhookUrl) {
+    console.log(`🟢 Sending notification for BOSS: ${bossName}`);
     fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: `⚔️ ${bossName} 即將重生！` }),
+    }).then(() => {
+      console.log(`🟢 Notification sent for BOSS: ${bossName}`);
+    }).catch((err) => {
+      console.error("🔴 Error sending notification:", err.message);
     });
   }
   res.send('Notified');
@@ -120,6 +144,7 @@ bot.on('messageCreate', async message => {
     const respawnTime = args[2];
 
     try {
+      console.log(`🟢 Updating respawn time for BOSS ${bossName} to ${respawnTime}`);
       const sheets = await getSheet();
       const result = await sheets.spreadsheets.values.get({
         spreadsheetId: SHEET_ID,
@@ -144,9 +169,10 @@ bot.on('messageCreate', async message => {
         },
       });
 
+      console.log(`🟢 BOSS ${bossName} respawn time updated to ${respawnTime}`);
       message.reply(`✅ 已更新 ${bossName} 的重生時間為 ${respawnTime}`);
     } catch (err) {
-      console.error('Google Sheets 更新錯誤：', err);
+      console.error("🔴 Google Sheets 更新錯誤：", err.message);
       message.reply('❌ 無法更新 Google Sheet，請稍後再試');
     }
   }
@@ -157,4 +183,6 @@ bot.login(process.env.DISCORD_BOT_TOKEN);
 
 // 啟動 web 伺服器
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🌐 Web server running on ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🌐 Web server running on ${PORT}`);
+});
