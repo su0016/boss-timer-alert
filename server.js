@@ -1,10 +1,10 @@
-const express = require('express');
-const fs = require('fs');
-const { google } = require('googleapis');
-const path = require('path');
-const bodyParser = require('body-parser');
-const fetch = require('node-fetch');
-const { Client, GatewayIntentBits } = require('discord.js');
+import express from 'express'; // 改為使用 import
+import fs from 'fs';
+import { google } from 'googleapis';
+import path from 'path';
+import bodyParser from 'body-parser';
+import fetch from 'node-fetch'; // 改為使用 import
+import { Client, GatewayIntentBits } from 'discord.js';
 
 const app = express();
 app.use(bodyParser.json());
@@ -109,7 +109,7 @@ app.get('/api/notify/:name', (req, res) => {
     console.log(`🟢 Sending notification for BOSS: ${bossName}`);
     fetch(webhookUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' }, // 去掉 Authorization 標頭
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: `⚔️ ${bossName} 即將重生！` }),
     }).then(() => {
       console.log(`🟢 Notification sent for BOSS: ${bossName}`);
